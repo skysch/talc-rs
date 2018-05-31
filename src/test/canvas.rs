@@ -10,8 +10,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Local imports.
-use Canvas;
-use Position;
+use canvas::Canvas;
+use geometry::Position;
 use test::TestCanvas;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,26 +86,6 @@ pub fn linear_clamp_45_negative_reversed() {
     let mut c = TestCanvas::square(5);
 
     let segment = [Position::new(6, -2), Position::new(-2, 6)];
-    let segment = c.linear_clamp(segment).unwrap();
-
-    assert_eq!(segment, [Position::new(4, 0), Position::new(0, 4)])
-}
-
-#[test]
-pub fn linear_clamp_45_negative_out_of_bounds() {
-    let mut c = TestCanvas::square(5);
-
-    let segment = [Position::new(8, -16), Position::new(16, -12)];
-    let segment = c.linear_clamp(segment).unwrap();
-
-    assert_eq!(segment, [Position::new(4, 0), Position::new(0, 4)])
-}
-
-#[test]
-pub fn linear_clamp_45_positive_out_of_bounds() {
-    let mut c = TestCanvas::square(5);
-
-    let segment = [Position::new(8, -12), Position::new(16, -16)];
     let segment = c.linear_clamp(segment).unwrap();
 
     assert_eq!(segment, [Position::new(4, 0), Position::new(0, 4)])

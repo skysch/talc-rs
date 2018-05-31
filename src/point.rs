@@ -11,8 +11,8 @@
 
 // Local imports.
 use Brush;
-use Position;
-use Canvas;
+use canvas::Canvas;
+use geometry::Position;
 
 
 //////////////////////////////////////////////////////////////////////////////

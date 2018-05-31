@@ -16,8 +16,8 @@ mod canvas;
 mod utilities;
 
 // Local imports.
-use Canvas;
-use Position;
+use canvas::Canvas;
+use geometry::Position;
 
 ////////////////////////////////////////////////////////////////////////////////
 // TestCanvas
