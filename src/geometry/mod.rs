@@ -6,7 +6,26 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 ////////////////////////////////////////////////////////////////////////////////
-//!
+//! Common geometry algorithms and primitives.
+//! 
+//! Geometry Algorithms
+//! --------------------------------------------------------------------------
+//! 
+//! Convert line to segment					Solve line equation mx+b-y = 0
+//! Convert ray to segment					Solve line equation mx+b-y = 0
+//! 
+//! Extend segment to bounding rect			Solve parametric line equation ax+bx+c = 0
+//! 
+//! Clip segment to bounding rect			Liang-Barksy algorithm
+//! Clip line to bounding rect				Convert line to segment, then clip segment to a bounding rect
+//! Clip ray to bounding rect				Convert ray to segment, then clip segment to a bounding rect
+//! Clip rect outline to bounding rect		Clip each bounding segment to the bounding rect
+//! Clip rect to bounding rect				Simple coordinate clip
+//! Clip poly outline to bounding rect		Clip each bounding segment to the bounding rect
+//! Clip poly to bounding rect				Sutherland–Hodgman algorithm
+//! Clip poly to bounding poly				Vatti clipping algorithm
+//! Clip segment to bounding poly			Cyrus-Beck algorithm
+//! 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Module declarations.
