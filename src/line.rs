@@ -6,17 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 ////////////////////////////////////////////////////////////////////////////////
-//!
+//! Line drawing primitives.
 ////////////////////////////////////////////////////////////////////////////////
 
 // Local imports.
-use Brush;
+use brush::Brush;
 use canvas::Canvas;
-use geometry::Position;
-
-// Standard library imports.
-
-
+use geometry::Point;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,7 +20,7 @@ use geometry::Position;
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a line segment.
 ///
-/// The resulting line segment will be cropped within the bounds of the 
+/// The resulting line segment will be cropped within the rect of the 
 /// canvas.
 ///
 /// # Arguments
@@ -33,13 +29,13 @@ use geometry::Position;
 ///
 /// `brush`: The [`Brush`] to draw with.
 ///
-/// `endpoints`: The [`Position`]s of the line segment's endpoints.
+/// `endpoints`: The [`Point`]s of the line segment's endpoints.
 ///
 ///
 pub fn segment<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    endpoints: [Position; 2])
+    endpoints: [Point; 2])
     where
         C: Canvas,
         B: Brush
@@ -52,7 +48,7 @@ pub fn segment<C, B>(
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a horizontal line segment.
 ///
-/// The resulting line segment will be cropped within the bounds of the 
+/// The resulting line segment will be cropped within the rect of the 
 /// canvas.
 ///
 /// # Arguments
@@ -61,16 +57,16 @@ pub fn segment<C, B>(
 ///
 /// `brush`: The [`Brush`] to draw with.
 ///
-/// `pos`: The [`Position`] of one of the line segment's endpoints.
+/// `pt`: The [`Point`] of one of the line segment's endpoints.
 ///
-/// `x`: The x-coordinate of the opposite endpoint.
+/// `x`: The x-coordinate of the opptite endpoint.
 ///
 ///
 pub fn segment_horizontal<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    pos: Position,
-    x: i32)
+    pt: Point,
+    x: f32)
     where
         C: Canvas,
         B: Brush
@@ -83,7 +79,7 @@ pub fn segment_horizontal<C, B>(
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a vertical line segment.
 ///
-/// The resulting line segment will be cropped within the bounds of the 
+/// The resulting line segment will be cropped within the rect of the 
 /// canvas.
 ///
 /// # Arguments
@@ -92,18 +88,18 @@ pub fn segment_horizontal<C, B>(
 ///
 /// `brush`: The [`Brush`] to draw with.
 ///
-/// `pos`: The [`Position`] of one of the line segment's endpoints.
+/// `pt`: The [`Point`] of one of the line segment's endpoints.
 ///
-/// `y`: The y-coordinate of the opposite endpoint.
+/// `y`: The y-coordinate of the opptite endpoint.
 ///
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
-/// [`Position`]: ../talc/struct.Position.html
+/// [`Point`]: ../talc/struct.Point.html
 pub fn segment_vertical<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    pos: Position,
-    y: i32)
+    pt: Point,
+    y: f32)
     where
         C: Canvas,
         B: Brush
@@ -116,7 +112,7 @@ pub fn segment_vertical<C, B>(
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a line overlaying a line segment.
 ///
-/// The resulting line will be cropped within the bounds of the canvas.
+/// The resulting line will be cropped within the rect of the canvas.
 ///
 /// # Arguments
 ///
@@ -124,36 +120,37 @@ pub fn segment_vertical<C, B>(
 ///
 /// `brush`: The [`Brush`] to draw with.
 ///
-/// `segment_endpoints`: The [`Position`] of one of the line segment's
+/// `segment_endpoints`: The [`Point`] of one of the line segment's
 ///
 /// endpoints.
 ///
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
-/// [`Position`]: ../talc/struct.Position.html
+/// [`Point`]: ../talc/struct.Point.html
 pub fn segment_extended<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    segment_endpoints: [Position; 2])
+    segment_endpoints: [Point; 2])
     where
         C: Canvas,
         B: Brush
 {
-    let [mut a, mut b] = segment_endpoints;
+    unimplemented!()
+    // let [mut a, mut b] = segment_endpoints;
 
-    // Calculate line slope.
-    let rise = b.y - a.y;
-    let run = b.x - a.x;
-    if rise == 0 {
-        line_horizontal(canvas, brush, a.y)
+    // // Calculate line slope.
+    // let rise = b.y - a.y;
+    // let run = b.x - a.x;
+    // if rise == 0.0 {
+    //     line_horizontal(canvas, brush, a.y)
 
-    } if run == 0 {
-        line_vertical(canvas, brush, a.x)
+    // } if run == 0.0 {
+    //     line_vertical(canvas, brush, a.x)
 
-    } else {
-        let slope = rise as f32 / run as f32;
-        line(canvas, brush, a, slope);
-    }
+    // } else {
+    //     let slope = rise / run;
+    //     line(canvas, brush, a, slope as f64);
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +158,7 @@ pub fn segment_extended<C, B>(
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a line.
 ///
-/// The resulting line will be cropped within the bounds of the canvas.
+/// The resulting line will be cropped within the rect of the canvas.
 ///
 /// # Arguments
 ///
@@ -169,18 +166,18 @@ pub fn segment_extended<C, B>(
 ///
 /// `brush`: The [`Brush`] to draw with.
 ///
-/// `pos`: The [`Position`] of a point on the line.
+/// `pt`: The [`Point`] of a point on the line.
 ///
 /// `angle`: The slope angle of the line in radians.
 ///
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
-/// [`Position`]: ../talc/struct.Position.html
+/// [`Point`]: ../talc/struct.Point.html
 pub fn line<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    pos: Position,
-    angle: f32)
+    pt: Point,
+    angle: f64)
     where
         C: Canvas,
         B: Brush
@@ -193,7 +190,7 @@ pub fn line<C, B>(
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws an horizontal line.
 ///
-/// The resulting line will be cropped within the bounds of the canvas.
+/// The resulting line will be cropped within the rect of the canvas.
 ///
 /// # Arguments
 ///
@@ -208,14 +205,15 @@ pub fn line<C, B>(
 pub fn line_horizontal<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    y: i32)
+    y: f32)
     where
         C: Canvas,
         B: Brush
 {
-    for x in canvas.left() ..= canvas.right() {
-        brush.apply(canvas, Position { x, y })
-    }
+    unimplemented!()
+    // for x in canvas.left() .. canvas.right() {
+    //     brush.apply(canvas, Point { x, y })
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +221,7 @@ pub fn line_horizontal<C, B>(
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws an vertical line.
 ///
-/// The resulting line will be cropped within the bounds of the canvas.
+/// The resulting line will be cropped within the rect of the canvas.
 ///
 /// # Arguments
 ///
@@ -238,14 +236,15 @@ pub fn line_horizontal<C, B>(
 pub fn line_vertical<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    x: i32)
+    x: f32)
     where
         C: Canvas,
         B: Brush
 {
-    for y in canvas.top() ..= canvas.bottom() {
-        brush.apply(canvas, Position { x, y })
-    }
+    unimplemented!()
+    // for y in canvas.top() .. canvas.bottom() {
+    //     brush.apply(canvas, Point { x, y })
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +252,7 @@ pub fn line_vertical<C, B>(
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a line segment as a lengh-delimitted ray.
 ///
-/// The resulting line segment will be cropped within the bounds of the
+/// The resulting line segment will be cropped within the rect of the
 /// canvas.
 ///
 /// # Arguments
@@ -262,7 +261,7 @@ pub fn line_vertical<C, B>(
 ///
 /// `brush`: The [`Brush`] to draw with.
 ///
-/// `from`: The [`Position`] of the start of the ray.
+/// `from`: The [`Point`] of the start of the ray.
 ///
 /// `angle`: The slope angle of the ray in radians.
 ///
@@ -270,13 +269,13 @@ pub fn line_vertical<C, B>(
 ///
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
-/// [`Position`]: ../talc/struct.Position.html
+/// [`Point`]: ../talc/struct.Point.html
 pub fn ray_segment<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    from: Position,
-    angle: f32,
-    len: f32)
+    from: Point,
+    angle: f64,
+    len: f64)
     where
         C: Canvas,
         B: Brush
@@ -289,7 +288,7 @@ pub fn ray_segment<C, B>(
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a ray.
 ///
-/// The resulting ray will be cropped within the bounds of the canvas.
+/// The resulting ray will be cropped within the rect of the canvas.
 ///
 /// # Arguments
 ///
@@ -297,18 +296,18 @@ pub fn ray_segment<C, B>(
 ///
 /// `brush`: The [`Brush`] to draw with.
 ///
-/// `from`: The [`Position`] of the start of the ray.
+/// `from`: The [`Point`] of the start of the ray.
 ///
 /// `angle`: The slope angle of the ray in radians.
 ///
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
-/// [`Position`]: ../talc/struct.Position.html
+/// [`Point`]: ../talc/struct.Point.html
 pub fn ray<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    pos: Position,
-    angle: f32)
+    pt: Point,
+    angle: f64)
     where
         C: Canvas,
         B: Brush
@@ -322,7 +321,7 @@ pub fn ray<C, B>(
 /// Draws a line segment as a normal to a ray.
 ///
 /// The resulting line segment will centered on the ray and cropped within the
-/// bounds of the canvas.
+/// rect of the canvas.
 ///
 /// # Arguments
 ///
@@ -330,24 +329,24 @@ pub fn ray<C, B>(
 ///
 /// `brush`: The [`Brush`] to draw with.
 ///
-/// `from`: The [`Position`] of the start of the ray.
+/// `from`: The [`Point`] of the start of the ray.
 ///
 /// `angle`: The slope angle of the ray in radians.
 ///
-/// `dist`: The line segment's distance from the ray's start position.
+/// `dist`: The line segment's distance from the ray's start ptition.
 ///
 /// `len`: The length of the line segment.
 ///
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
-/// [`Position`]: ../talc/struct.Position.html
+/// [`Point`]: ../talc/struct.Point.html
 pub fn normal_segment<C, B>(
     canvas: &mut C,
     brush: &mut B,
-    from: Position,
-    angle: f32,
-    dist: f32,
-    len: f32)
+    from: Point,
+    angle: f64,
+    dist: f64,
+    len: f64)
     where
         C: Canvas,
         B: Brush

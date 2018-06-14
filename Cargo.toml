@@ -18,12 +18,14 @@ name = "talc"
 
 [dependencies]
 
+
 [dev-dependencies]
-criterion = "0.2"
+criterion = { version="0.2", features=['real_blackbox'] }
 
 [[bench]]
-name = "line_intersect"
+name = "bench_talc"
 harness = false
+
 
 # The development profile, used for `cargo build`
 [profile.dev]

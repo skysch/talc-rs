@@ -6,32 +6,32 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 ////////////////////////////////////////////////////////////////////////////////
-//! Point drawing primitives.
+//!
 ////////////////////////////////////////////////////////////////////////////////
 
 // Local imports.
-use brush::Brush;
 use canvas::Canvas;
 use geometry::Point;
 
 
-//////////////////////////////////////////////////////////////////////////////
-// point
-//////////////////////////////////////////////////////////////////////////////
-/// Draws a point.
-///
-/// # Arguments
-///
-/// `canvas`: The [`Canvas`] to draw to.
-/// `brush`: The [`Brush`] to draw with.
-/// `pt`: The [`Point`] of the point.
-pub fn point<C, B>(
-    canvas: &mut C,
-    brush: &mut B, 
-    pt: Point)
-    where
-        C: Canvas,
-        B: Brush
-{
-    brush.apply(canvas, pt);
+////////////////////////////////////////////////////////////////////////////////
+// Brush
+////////////////////////////////////////////////////////////////////////////////
+pub trait Brush {
+    fn apply<C>(&mut self, canvas: &mut C, pt: Point)
+        where C: Canvas;
+
+    fn width(&self) -> u32 { 1 }
+    fn height(&self) -> u32 { 1 }
+}
+
+
+
+// Basic brushes.
+impl Brush for u32 {
+	fn apply<C>(&mut self, canvas: &mut C, pt: Point)
+        where C: Canvas
+    {
+    	canvas.pixel_mut(pt).map(|p| *p = *self);
+    }
 }
