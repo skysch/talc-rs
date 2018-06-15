@@ -14,7 +14,7 @@
 // Line Algorithms
 // -------------------
 // 
-// segment-intersect          Solve line system ax+bx+c = 0
+// segment_intersect          Solve line system ax+bx+c = 0
 // 
 // convert_line_to_segment    Solve line equation mx+b-y = 0
 // convert_ray_to_segment     Solve line equation mx+b-y = 0
@@ -38,12 +38,25 @@ use std::f32;
 use utilities::same_sign;
 
 
+////////////////////////////////////////////////////////////////////////////////
+// Intersection
+////////////////////////////////////////////////////////////////////////////////
+/// A description of the intersection of lines or segments.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Intersection {
+    /// The lines or segments intersect at the provided point.
+    At(Point),
+    /// The lines or segments are colinear.
+    Colinear,
+    /// The lines or segments do not intersect.
+    None,
+}
 
 ////////////////////////////////////////////////////////////////////////////////
-// segment_intersect
+// intersect_segment_with_segment
 ////////////////////////////////////////////////////////////////////////////////
-/// Computes the intersection of two line segments. Returns a
-/// [`SegmentIntersect`] describing the intersection points.
+/// Computes the intersection of two line segments. Returns an [`Intersection`]
+/// describing the intersection point.
 ///
 /// # Arguments
 ///
@@ -51,10 +64,11 @@ use utilities::same_sign;
 ///
 /// `epb`: The [`Point`]s of the endpoints of the second line segment.
 ///
-///
 /// [`Point`]: ../talc/struct.Point.html
-/// [`Point`]: struct.SegmentIntersect.html
-pub fn segment_intersect(epa: [Point; 2], epb: [Point; 2]) -> SegmentIntersect {
+/// [`Point`]: struct.Intersection.html
+pub fn intersect_segment_with_segment(epa: [Point; 2], epb: [Point; 2]) 
+    -> Intersection
+{
     // Adapted from C implementation by Mukesh Prasad at
     // http://www.realtimerendering.com/resources/GraphicsGems/gemsii/xlines.c
 
@@ -63,13 +77,14 @@ pub fn segment_intersect(epa: [Point; 2], epb: [Point; 2]) -> SegmentIntersect {
     let b1 = epa[0].x - epa[1].x;
     let c1 = epa[1].x * epa[0].y - epa[0].x * epa[1].y;
 
-    let r3 = a1 * epb[0].x + b1 * epb[0].y + c1;
-    let r4 = a1 * epb[1].x + b1 * epb[1].y + c1;
+    // Solve equation for endpoints of other segment.
+    let ab_r0 = a1 * epb[0].x + b1 * epb[0].y + c1;
+    let ab_r1 = a1 * epb[1].x + b1 * epb[1].y + c1;
 
-    // Check signs of r3 and r4. If both point 3 and point 4 lie on same side of
-    // segment A, the line segments do not intersect.
-    if r3 != 0.0 && r4 != 0.0 && same_sign(r3, r4) {
-        return SegmentIntersect::None;
+    // Zeros mean the endpoints lie on the line. Otherwise, if they have the
+    // same sign, they are on the same side of the line and can't intersect it.
+    if ab_r0 != 0.0 && ab_r1 != 0.0 && same_sign(ab_r0, ab_r1) {
+        return Intersection::None;
     }
 
     // Calculate coefficients for line equation a2 * x + b2 * y + c2 = 0.
@@ -77,48 +92,86 @@ pub fn segment_intersect(epa: [Point; 2], epb: [Point; 2]) -> SegmentIntersect {
     let b2 = epb[0].x - epb[1].x;
     let c2 = epb[1].x * epb[0].y - epb[0].x * epb[1].y;
 
-    let r1 = a2 * epa[0].x + b2 * epa[0].y + c2;
-    let r2 = a2 * epa[1].x + b2 * epa[1].y + c2;
+    // Solve equation for endpoints of other segment.
+    let ba_r0 = a2 * epa[0].x + b2 * epa[0].y + c2;
+    let ba_r1 = a2 * epa[1].x + b2 * epa[1].y + c2;
 
-
-    // Check signs of r1 and r2. If both point 1 and point 2 lie on same side of
-    // segment B, the line segments do not intersect.
-    if r1 != 0.0 && r2 != 0.0 && same_sign(r1, r2) {
-        return SegmentIntersect::None;
+    // Zeros mean the endpoints lie on the line. Otherwise, if they have the
+    // same sign, they are on the same side of the line and can't intersect it.
+    if ba_r0 != 0.0 && ba_r1 != 0.0 && same_sign(ba_r0, ba_r1) {
+        return Intersection::None;
     }
 
     // Line segments intersect. Compute intersection point. 
     let denom = a1 * b2 - a2 * b1;
-    if denom == 0.0 { return SegmentIntersect::Colinear; }
+    if denom == 0.0 { return Intersection::Colinear; }
 
-    // The denominator is divided by 2 to get rounding instead of truncating. It
-    // is added or subtracted to the numerator, depending upon the sign of the
-    // numerator.
-    let offset = if denom < 0.0 { -denom / 2.0 } else { denom / 2.0};
+    // If we wanted to return integers with round-to-nearest behavior, we would
+    // divide the denominator by 2 here. Instead, we just return the actual
+    // interection point.
+    let offset = 0.0;
+    // let offset = if denom < 0.0 { -denom / 2.0 } else { denom / 2.0 };
 
-    let num = b1 * c2 - b2 * c1;
-    let x = if num < 0.0 { num - offset } else { num + offset } / denom;
+    let dx = b1 * c2 - b2 * c1;
+    let x = if dx < 0.0 { dx - offset } else { dx + offset } / denom;
 
-    let num = a2 * c1 - a1 * c2;
-    let y = if num < 0.0 { num - offset } else { num + offset } / denom;
+    let dy = a2 * c1 - a1 * c2;
+    let y = if dy < 0.0 { dy - offset } else { dy + offset } / denom;
 
-    SegmentIntersect::At(Point { x, y })
-}
-
-
-/// A description of the intersection of two line segments.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum SegmentIntersect {
-    /// The lines intersect at the provided point.
-    At(Point),
-    /// The lines are colinear.
-    Colinear,
-    /// The lines do not intersect.
-    None,
+    Intersection::At(Point { x, y })
 }
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+// intersect_line_with_segment
+////////////////////////////////////////////////////////////////////////////////
+/// Computes the intersection of two line segments. Returns a
+/// [`Intersection`] describing the intersection points.
+///
+/// # Arguments
+///
+/// `epa`: The [`Point`]s of the endpoints of the first line segment.
+///
+/// `epb`: The [`Point`]s of the endpoints of the second line segment.
+///
+/// [`Point`]: ../talc/struct.Point.html
+/// [`Point`]: struct.Intersection.html
+pub fn intersect_line_with_segment(pt: Point, angle: f64, segment: [Point; 2])
+    -> Intersection
+{
+    let theta = angle_shift(angle, 0.0);
+   
+    Intersection::None
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// intersect_segment_with_rect
+////////////////////////////////////////////////////////////////////////////////
+/// Returns the largest segment colinear with the given line that lies
+/// entirely within the `Rect`.
+pub fn intersect_segment_with_rect(segment: [Point; 2], rect: Rect)
+    -> Option<[Point; 2]>
+{
+    /// This is an implementation of the Liang-Barsky algorithm.
+    
+    None
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// intersect_line_with_rect
+////////////////////////////////////////////////////////////////////////////////
+/// Returns the largest segment colinear with the given line that lies
+/// entirely within the `Rect`.
+pub fn intersect_line_with_rect(pt: Point, angle: f64, rect: Rect)
+    -> Option<[Point; 2]>
+{
+    /// This is an implementation of the Liang-Barsky algorithm.
+    
+    None
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // convert_line_to_segment
@@ -175,18 +228,6 @@ pub fn convert_ray_to_segment(pt: Point, angle: f64) -> [Point; 2] {
 ////////////////////////////////////////////////////////////////////////////////
 // extend_segment_to_rect
 ////////////////////////////////////////////////////////////////////////////////
-/// Computes the intersection of two line segments. Returns a
-/// [`SegmentIntersect`] describing the intersection points.
-///
-/// # Arguments
-///
-/// `epa`: The [`Point`]s of the endpoints of the first line segment.
-///
-/// `epb`: The [`Point`]s of the endpoints of the second line segment.
-///
-///
-/// [`Point`]: ../talc/struct.Point.html
-/// [`Point`]: struct.SegmentIntersect.html
 pub fn extend_segment_to_rect(segment: [Point; 2], rect: Rect) -> Option<[Point; 2]>
 {
     // Terse segment constructor.
@@ -266,16 +307,6 @@ pub fn extend_segment_to_rect(segment: [Point; 2], rect: Rect) -> Option<[Point;
 }
 
 
-/// Returns the largest segment colinear with the given line that lies
-/// entirely within the `Rect`.
-pub fn line_intersect(pt: Point, angle: f64, rect: Rect)
-    -> Option<[Point; 2]>
-{
-    /// This is an implementation of the Liang-Barsky algorithm.
-    
-    None
-
-}
 
 
 
@@ -288,7 +319,7 @@ pub fn clip_segment_to_rect(
     rect: [Point; 2])
     -> Option<[Point; 2]>
 {
-    use geometry::line::SegmentIntersect::*;
+    use geometry::line::Intersection::*;
 
     // Get edge segments.
     let h0 = [rect[0], Point {x: rect[1].x, y: rect[0].y}];
@@ -297,10 +328,10 @@ pub fn clip_segment_to_rect(
     let v1 = [rect[1], Point {x: rect[1].x, y: rect[0].y}];
 
     // Intersect edges with the segment.
-    let mut h0i = segment_intersect(segment, h0);
-    let mut h1i = segment_intersect(segment, h1);
-    let mut v0i = segment_intersect(segment, v0);
-    let mut v1i = segment_intersect(segment, v1);
+    let mut h0i = intersect_segment_with_segment(segment, h0);
+    let mut h1i = intersect_segment_with_segment(segment, h1);
+    let mut v0i = intersect_segment_with_segment(segment, v0);
+    let mut v1i = intersect_segment_with_segment(segment, v1);
 
     // If the intersection is outside the rect, invalidate it.
     if let At(p) = h0i { if !p.contained_in(rect) { h0i = None } };

@@ -26,7 +26,7 @@ pub fn interior() {
 
     let mut c = TestCanvas::square(5);
 
-    point(&mut c, &mut 0xFF, Point { x: 1, y: 3 });
+    point(&mut c, &mut 0xFF, Point { x: 1.0, y: 3.0 });
 
     assert_eq!(c.buffer, [
         0x00, 0x00, 0x00, 0x00, 0x00,
@@ -42,7 +42,7 @@ pub fn exterior() {
 
     let mut c = TestCanvas::square(5);
 
-    point(&mut c, &mut 0xFF, Point { x: -1, y: 4 });
+    point(&mut c, &mut 0xFF, Point { x: -1.0, y: 4.0 });
 
     assert_eq!(c.buffer, [
         0x00, 0x00, 0x00, 0x00, 0x00,
@@ -58,7 +58,7 @@ pub fn edge() {
 
     let mut c = TestCanvas::square(5);
 
-    point(&mut c, &mut 0xFF, Point { x: 0, y: 2 });
+    point(&mut c, &mut 0xFF, Point { x: 0.0, y: 2.0 });
 
     assert_eq!(c.buffer, [
         0x00, 0x00, 0x00, 0x00, 0x00,

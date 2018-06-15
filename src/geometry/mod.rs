@@ -37,8 +37,18 @@ use std::ops::Neg;
 use std::f32;
 
 // Exports.
+pub use self::line::clip_line_to_rect;
+pub use self::line::clip_ray_to_rect;
+pub use self::line::clip_segment_to_poly;
+pub use self::line::clip_segment_to_rect;
 pub use self::line::convert_line_to_segment;
-
+pub use self::line::convert_ray_to_segment;
+pub use self::line::extend_segment_to_rect;
+pub use self::line::intersect_segment_with_segment;
+pub use self::line::intersect_line_with_segment;
+pub use self::line::intersect_segment_with_rect;
+pub use self::line::intersect_line_with_rect;
+pub use self::line::Intersection;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Point

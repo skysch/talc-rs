@@ -1,4 +1,4 @@
-// Copyright 2018 Skylor R. Schermer.
+// Copyright 20.018 Skylor R. Schermer.
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
@@ -10,121 +10,121 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Local imports.
-use geometry::Rect;
+use geometry::extend_segment_to_rect;
 use geometry::Point;
-use geometry::segment_intersect;
-use geometry::SegmentIntersect;
+use geometry::Rect;
+use geometry::intersect_segment_with_segment;
+use geometry::Intersection;
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// segment_intersect
+// intersect_segment_with_segment
 ////////////////////////////////////////////////////////////////////////////////
 #[test]
 fn origin_cross_segment() {
-    assert_eq!(segment_intersect(
-        [Point::new(-10, -10), Point::new(10, 10)], 
-        [Point::new(10, -10), Point::new(-10, 10)]),
-        SegmentIntersect::Point(Point::new(0, 0)));
+    assert_eq!(intersect_segment_with_segment(
+        [Point::new(-10.0, -10.0), Point::new(10.0, 10.0)], 
+        [Point::new(10.0, -10.0), Point::new(-10.0, 10.0)]),
+        Intersection::At(Point::new(0.0, 0.0)));
 }
 
 #[test]
 fn origin_cross_distant_segment() {
-    assert_eq!(segment_intersect(
-        [Point::new(-20, -20), Point::new(-10, -10)], 
-        [Point::new(20, -20), Point::new(10, -10)]),
-        SegmentIntersect::None);
+    assert_eq!(intersect_segment_with_segment(
+        [Point::new(-20.0, -20.0), Point::new(-10.0, -10.0)], 
+        [Point::new(20.0, -20.0), Point::new(10.0, -10.0)]),
+        Intersection::None);
 }
 
 #[test]
 fn parallel_segment() {
-    assert_eq!(segment_intersect(
-        [Point::new(0, 0), Point::new(5, 5)], 
-        [Point::new(10, 10), Point::new(15, 15)]),
-        SegmentIntersect::Colinear);
+    assert_eq!(intersect_segment_with_segment(
+        [Point::new(0.0, 0.0), Point::new(5.0, 5.0)], 
+        [Point::new(10.0, 10.0), Point::new(15.0, 15.0)]),
+        Intersection::Colinear);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Rect
+// extend_segment_to_rect
 ////////////////////////////////////////////////////////////////////////////////
-
 #[test]
-fn rect_spanning_vertical_interior() {
-    let rect = Rect { left: 0, top: 0, right: 100, bottom: 100 };
+fn extend_segment_to_rect_vertical_interior() {
+    let rect = Rect { left: 0.0, top: 0.0, right: 100.0, bottom: 100.0 };
 
-    let segment = [Point::new(10, 10), Point::new(10, 60)];
+    let segment = [Point::new(10.0, 10.0), Point::new(10.0, 60.0)];
 
-    assert_eq!(rect.spanning_segment(segment),
-         Some([Point::new(10, 0), Point::new(10, 100)]));
+    assert_eq!(extend_segment_to_rect(segment, rect),
+         Some([Point::new(10.0, 0.0), Point::new(10.0, 100.0)]));
 }
 
 #[test]
-fn rect_spanning_vertical_overlap() {
-    let rect = Rect { left: 0, top: 0, right: 100, bottom: 100 };
+fn extend_segment_to_rect_vertical_overlap() {
+    let rect = Rect { left: 0.0, top: 0.0, right: 100.0, bottom: 100.0 };
 
-    let segment = [Point::new(10, -10), Point::new(10, 60)];
+    let segment = [Point::new(10.0, -10.0), Point::new(10.0, 60.0)];
 
-    assert_eq!(rect.spanning_segment(segment),
-         Some([Point::new(10, 0), Point::new(10, 100)]));
+    assert_eq!(extend_segment_to_rect(segment, rect),
+         Some([Point::new(10.0, 0.0), Point::new(10.0, 100.0)]));
 }
 
 #[test]
-fn rect_spanning_vertical_exterior() {
-    let rect = Rect { left: 0, top: 0, right: 100, bottom: 100 };
+fn extend_segment_to_rect_vertical_exterior() {
+    let rect = Rect { left: 0.0, top: 0.0, right: 100.0, bottom: 100.0 };
 
-    let segment = [Point::new(10, -10), Point::new(10, -60)];
+    let segment = [Point::new(10.0, -10.0), Point::new(10.0, -60.0)];
 
-    assert_eq!(rect.spanning_segment(segment),
-         Some([Point::new(10, 0), Point::new(10, 100)]));
+    assert_eq!(extend_segment_to_rect(segment, rect),
+         Some([Point::new(10.0, 0.0), Point::new(10.0, 100.0)]));
 }
 
 #[test]
-fn rect_spanning_vertical_degenerate_edge() {
-    let rect = Rect { left: 0, top: 0, right: 100, bottom: 100 };
+fn extend_segment_to_rect_vertical_degenerate_edge() {
+    let rect = Rect { left: 0.0, top: 0.0, right: 100.0, bottom: 100.0 };
 
-    let segment = [Point::new(0, -10), Point::new(0, -60)];
+    let segment = [Point::new(0.0, -10.0), Point::new(0.0, -60.0)];
 
-    assert_eq!(rect.spanning_segment(segment),
-         Some([Point::new(0, 0), Point::new(0, 100)]));
+    assert_eq!(extend_segment_to_rect(segment, rect),
+         Some([Point::new(0.0, 0.0), Point::new(0.0, 100.0)]));
 }
 
 #[test]
-fn rect_spanning_horizontal_interior() {
-    let rect = Rect { left: 0, top: 0, right: 100, bottom: 100 };
+fn extend_segment_to_rect_horizontal_interior() {
+    let rect = Rect { left: 0.0, top: 0.0, right: 100.0, bottom: 100.0 };
 
-    let segment = [Point::new(10, 10), Point::new(60, 10)];
+    let segment = [Point::new(10.0, 10.0), Point::new(60.0, 10.0)];
 
-    assert_eq!(rect.spanning_segment(segment),
-         Some([Point::new(0, 10), Point::new(100, 10)]));
+    assert_eq!(extend_segment_to_rect(segment, rect),
+         Some([Point::new(0.0, 10.0), Point::new(100.0, 10.0)]));
 }
 
 #[test]
-fn rect_spanning_horizontal_overlap() {
-    let rect = Rect { left: 0, top: 0, right: 100, bottom: 100 };
+fn extend_segment_to_rect_horizontal_overlap() {
+    let rect = Rect { left: 0.0, top: 0.0, right: 100.0, bottom: 100.0 };
 
-    let segment = [Point::new(-10, 10), Point::new(60, 10)];
+    let segment = [Point::new(-10.0, 10.0), Point::new(60.0, 10.0)];
 
-    assert_eq!(rect.spanning_segment(segment),
-         Some([Point::new(0, 10), Point::new(100, 10)]));
+    assert_eq!(extend_segment_to_rect(segment, rect),
+         Some([Point::new(0.0, 10.0), Point::new(100.0, 10.0)]));
 }
 
 #[test]
-fn rect_spanning_horizontal_exterior() {
-    let rect = Rect { left: 0, top: 0, right: 100, bottom: 100 };
+fn extend_segment_to_rect_horizontal_exterior() {
+    let rect = Rect { left: 0.0, top: 0.0, right: 100.0, bottom: 100.0 };
 
-    let segment = [Point::new(-10, 10), Point::new(-60, 10)];
+    let segment = [Point::new(-10.0, 10.0), Point::new(-60.0, 10.0)];
 
-    assert_eq!(rect.spanning_segment(segment),
-         Some([Point::new(0, 10), Point::new(100, 10)]));
+    assert_eq!(extend_segment_to_rect(segment, rect),
+         Some([Point::new(0.0, 10.0), Point::new(100.0, 10.0)]));
 }
 
 #[test]
-fn rect_spanning_horizontal_degenerate_edge() {
-    let rect = Rect { left: 0, top: 0, right: 100, bottom: 100 };
+fn extend_segment_to_rect_horizontal_degenerate_edge() {
+    let rect = Rect { left: 0.0, top: 0.0, right: 100.0, bottom: 100.0 };
 
-    let segment = [Point::new(-10, 0), Point::new(-60, 0)];
+    let segment = [Point::new(-10.0, 0.0), Point::new(-60.0, 0.0)];
 
-    assert_eq!(rect.spanning_segment(segment),
-         Some([Point::new(0, 0), Point::new(100, 0)]));
+    assert_eq!(extend_segment_to_rect(segment, rect),
+         Some([Point::new(0.0, 0.0), Point::new(100.0, 0.0)]));
 }
