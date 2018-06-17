@@ -98,6 +98,8 @@ pub fn clamped<T>(value: T, lower_bound: T, upper_bound: T) -> T
     }
 }
 
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // ordered
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +110,31 @@ pub fn ordered<T>(a: T, b: T) -> (T, T)
 {
 	if a <= b {(a, b)} else {(b, a)}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// clipped
+////////////////////////////////////////////////////////////////////////////////
+/// Returns the given value pair clipped between the provided bounds if either
+/// point lies between them, or `None` otherwise.
+#[inline]
+pub fn clipped<T>(values: (T, T), lower_bound: T, upper_bound: T)
+    -> Option<(T, T)>
+    where T: PartialOrd + Clone
+{
+    assert!(lower_bound <= upper_bound);
+
+    if (values.0 >= lower_bound && values.0 <= upper_bound) ||
+       (values.1 >= lower_bound && values.1 <= upper_bound)
+    {
+        Some((
+            clamped(values.0, lower_bound.clone(), upper_bound.clone()),
+            clamped(values.1, lower_bound, upper_bound)
+        ))
+    } else {
+        None
+    }
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////

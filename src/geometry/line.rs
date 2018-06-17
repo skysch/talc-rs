@@ -10,23 +10,6 @@
 //! Common line algorithms and primitives.
 //!
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Line Algorithms
-// -------------------
-// 
-// segment_intersect          Solve line system ax+bx+c = 0
-// 
-// convert_line_to_segment    Solve line equation mx+b-y = 0
-// convert_ray_to_segment     Solve line equation mx+b-y = 0
-// 
-// extend_segment_to_rect     Segment intersect each side of rect
-//
-// clip_segment_to_rect       Liang-Barksy algorithm
-// clip_line_to_rect          Convert line to segment, then clip segment to rect
-// clip_ray_to_rect           Convert ray to segment, then clip segment to rect
-// clip_segment_to_poly       Cyrus-Beck algorithm
-// 
-////////////////////////////////////////////////////////////////////////////////
 
 // Local imports.
 use geometry::angle::angle_classify;
@@ -34,9 +17,12 @@ use geometry::angle::angle_shift;
 use geometry::angle::AngleType;
 use geometry::Point;
 use geometry::Rect;
-use std::f32;
+use utilities::clipped;
+use utilities::ordered;
 use utilities::same_sign;
 
+// Standard library imports.
+use std::f32;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Intersection
@@ -52,20 +38,102 @@ pub enum Intersection {
     None,
 }
 
+
+enum EdgeIntersection {
+    Colinear([Point; 2]),
+    At(Point),
+    None,
+}
+
+struct RectEdgeIter {
+    rect: Rect,
+    edge_num: u8,
+}
+impl RectEdgeIter {
+    pub fn new(rect: Rect) -> Self {
+        RectEdgeIter { rect, edge_num: 0 }
+    }
+}
+
+impl Iterator for RectEdgeIter {
+    type Item = [Point; 2];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.edge_num >= 4 {
+            None
+        } else {
+            self.edge_num += 1;
+            match self.edge_num {
+                1 => Some([ // Top
+                    Point { x: self.rect.left, y: self.rect.top },
+                    Point { x: self.rect.right, y: self.rect.top },
+                ]),
+                2 => Some([ // Left
+                    Point { x: self.rect.left, y: self.rect.top },
+                    Point { x: self.rect.left, y: self.rect.bottom },
+                ]),
+                3 => Some([ // Right
+                    Point { x: self.rect.right, y: self.rect.top },
+                    Point { x: self.rect.right, y: self.rect.bottom },
+                ]),
+                4 => Some([ // Bottom
+                    Point { x: self.rect.left, y: self.rect.bottom },
+                    Point { x: self.rect.right, y: self.rect.bottom },
+                ]),
+                _ => unreachable!(),
+            }
+        }
+    }
+}
+
+
+struct RectEdgeIntersectIter {
+    angle: f64,
+    pt: Point,
+    edges: RectEdgeIter,
+}
+
+impl RectEdgeIntersectIter {
+    pub fn new(pt: Point, angle: f64, rect: Rect) -> Self {
+        RectEdgeIntersectIter {  angle, pt, edges: RectEdgeIter::new(rect) }
+    }
+}
+
+impl Iterator for RectEdgeIntersectIter {
+    type Item = EdgeIntersection;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(edge) = self.edges.next() {
+            match intersect_line_with_segment(self.pt, self.angle, edge) {
+                Intersection::Colinear => {
+                    return Some(EdgeIntersection::Colinear(edge));
+                },
+                Intersection::At(pt) => {
+                    return Some(EdgeIntersection::At(pt));
+                },
+                Intersection::None => {
+                    /* Do nothing. */
+                },
+            }
+        }
+        None
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // intersect_segment_with_segment
 ////////////////////////////////////////////////////////////////////////////////
 /// Computes the intersection of two line segments. Returns an [`Intersection`]
-/// describing the intersection point.
+/// describing the intersection [`Point`].
 ///
 /// # Arguments
 ///
-/// `epa`: The [`Point`]s of the endpoints of the first line segment.
+/// `epa`: The endpoints of the first line segment.
 ///
-/// `epb`: The [`Point`]s of the endpoints of the second line segment.
+/// `epb`: The endpoints of the second line segment.
 ///
 /// [`Point`]: ../talc/struct.Point.html
-/// [`Point`]: struct.Intersection.html
+/// [`Intersection`]: struct.Intersection.html
 pub fn intersect_segment_with_segment(epa: [Point; 2], epb: [Point; 2]) 
     -> Intersection
 {
@@ -83,7 +151,9 @@ pub fn intersect_segment_with_segment(epa: [Point; 2], epb: [Point; 2])
 
     // Zeros mean the endpoints lie on the line. Otherwise, if they have the
     // same sign, they are on the same side of the line and can't intersect it.
-    if ab_r0 != 0.0 && ab_r1 != 0.0 && same_sign(ab_r0, ab_r1) {
+    if ab_r0 == 0.0 && ab_r1 == 0.0 {
+        return Intersection::Colinear;
+    } else if same_sign(ab_r0, ab_r1) {
         return Intersection::None;
     }
 
@@ -102,21 +172,13 @@ pub fn intersect_segment_with_segment(epa: [Point; 2], epb: [Point; 2])
         return Intersection::None;
     }
 
-    // Line segments intersect. Compute intersection point. 
-    let denom = a1 * b2 - a2 * b1;
-    if denom == 0.0 { return Intersection::Colinear; }
-
+    // Line segments intersect. Compute intersection point.
     // If we wanted to return integers with round-to-nearest behavior, we would
-    // divide the denominator by 2 here. Instead, we just return the actual
+    // divide the denominator by 2 here. Instead, we just return the logical
     // interection point.
-    let offset = 0.0;
-    // let offset = if denom < 0.0 { -denom / 2.0 } else { denom / 2.0 };
-
-    let dx = b1 * c2 - b2 * c1;
-    let x = if dx < 0.0 { dx - offset } else { dx + offset } / denom;
-
-    let dy = a2 * c1 - a1 * c2;
-    let y = if dy < 0.0 { dy - offset } else { dy + offset } / denom;
+    let denom = a1 * b2 - a2 * b1;
+    let x = (b1 * c2 - b2 * c1) / denom;
+    let y = (a2 * c1 - a1 * c2) / denom;
 
     Intersection::At(Point { x, y })
 }
@@ -126,104 +188,89 @@ pub fn intersect_segment_with_segment(epa: [Point; 2], epb: [Point; 2])
 ////////////////////////////////////////////////////////////////////////////////
 // intersect_line_with_segment
 ////////////////////////////////////////////////////////////////////////////////
-/// Computes the intersection of two line segments. Returns a
-/// [`Intersection`] describing the intersection points.
+/// Computes the intersection of a line with a line segment. Returns an
+/// [`Intersection`] describing the intersection [`Point`].
 ///
 /// # Arguments
 ///
-/// `epa`: The [`Point`]s of the endpoints of the first line segment.
+/// `pt`: A point on the line.
 ///
-/// `epb`: The [`Point`]s of the endpoints of the second line segment.
+/// `angle`: The line's angle with respect to the positive x-axis.
+///
+/// `segment`: The endpoints of the line segment.
 ///
 /// [`Point`]: ../talc/struct.Point.html
-/// [`Point`]: struct.Intersection.html
+/// [`Intersection`]: struct.Intersection.html
 pub fn intersect_line_with_segment(pt: Point, angle: f64, segment: [Point; 2])
     -> Intersection
 {
-    let theta = angle_shift(angle, 0.0);
-   
-    Intersection::None
-}
+    if segment[0] == segment[1] { panic!("invalid segment"); }
 
-////////////////////////////////////////////////////////////////////////////////
-// intersect_segment_with_rect
-////////////////////////////////////////////////////////////////////////////////
-/// Returns the largest segment colinear with the given line that lies
-/// entirely within the `Rect`.
-pub fn intersect_segment_with_rect(segment: [Point; 2], rect: Rect)
-    -> Option<[Point; 2]>
-{
-    /// This is an implementation of the Liang-Barsky algorithm.
-    
-    None
+    // Calculate coefficients for line equation ax + by + c = 0.
+    let a = segment[1].y - segment[0].y;
+    let b = segment[0].x - segment[1].x;
+    let c = segment[1].x * segment[0].y - segment[0].x * segment[1].y;
 
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// intersect_line_with_rect
-////////////////////////////////////////////////////////////////////////////////
-/// Returns the largest segment colinear with the given line that lies
-/// entirely within the `Rect`.
-pub fn intersect_line_with_rect(pt: Point, angle: f64, rect: Rect)
-    -> Option<[Point; 2]>
-{
-    /// This is an implementation of the Liang-Barsky algorithm.
-    
-    None
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// convert_line_to_segment
-////////////////////////////////////////////////////////////////////////////////
-pub fn convert_line_to_segment(pt: Point, angle: f64) -> [Point; 2] {
     match angle_classify(angle) {
         AngleType::Invalid       => panic!("invalid line angle"),
-        AngleType::Horizontal    => [
-            Point { x: f32::MIN, y: pt.y },
-            Point { x: f32::MAX, y: pt.y },
-        ],
-        AngleType::Vertical      => [
-            Point { x: pt.x, y: f32::MIN },
-            Point { x: pt.x, y: f32::MAX },
-        ],
-        AngleType::Normal(theta) => {
-            let (min, max) = (f32::MIN as f64, f32::MAX as f64);
-            let (sin_theta, cos_theta) = theta.sin_cos();
+        AngleType::Horizontal    => {
+            let (y0, y1) = ordered(segment[0].y, segment[1].y);
 
-            // Neither sin or cos can be 1 or 0.0 here.
-            let (x, y) = (pt.x as f64, pt.y as f64);
-            let m = sin_theta / cos_theta; 
-            let b = y - m * x;
+            if pt.y >= y0 && pt.y <= y1 && a != 0.0 {
+                let x = (-b * pt.y - c) / a;
+                Intersection::At(Point { x, y: pt.y })
 
-            let y_xmin = Some((min - b) / m).filter(|&v| v >= min && v <= max);
-            let y_xmax = Some((max - b) / m).filter(|&v| v >= min && v <= max);
-            let x_ymin = Some(m * min + b).filter(|&v| v >= min && v <= max);
-            let x_ymax = Some(m * max + b).filter(|&v| v >= min && v <= max);
+            } else if pt.y == y0 && pt.y == y1 && a == 0.0 {
+                Intersection::Colinear
 
-
-            // match (y_xmin, y_xmax, x_ymin, x_ymax) {
-            //     (Some(y_xmin), Some(y_xmax),            _,           _) => [
-            //         Point { x: min, y: y_xmin },
-            //         Point { x: max, y: y_xmax },
-            //     ],
-            //     (Some(y_xmin),            _, Some(x_ymin),            _) => 
-            //     (Some(y_xmin),            _,            _, Some(x_ymax)) => 
-
-            //     (Some(y_xmin), Some(y_xmax), Some(x_ymin), Some(x_ymax)) => 
-            // }
-
-            [pt, pt]
+            } else {
+                Intersection::None
+            }
         },
-    }    
+        AngleType::Vertical      => {
+            let (x0, x1) = ordered(segment[0].x, segment[1].x);
+
+            if pt.x >= x0 && pt.x <= x1 && b != 0.0 {
+                let y = (-a * pt.x - c) / b;
+                Intersection::At(Point { x: pt.x, y })
+
+            } else if pt.x == x0 && pt.x == x1 && b == 0.0 {
+                Intersection::Colinear
+
+            } else {
+                Intersection::None
+            }
+        },
+        AngleType::Normal(theta) => {
+            // Compute line equation mx + b - y = 0
+            let (sin_theta, cos_theta) = theta.sin_cos();
+            // Neither sin or cos can be 1 or 0.0 here.
+            let m = sin_theta as f32 / cos_theta as f32;
+            let y_0 = pt.y - m * pt.x;
+
+            // Solve equation for endpoints of other segment.
+            let r0 = m * segment[0].x + y_0 - segment[0].y;
+            let r1 = m * segment[1].x + y_0 - segment[1].y;
+
+            // Zeros mean the endpoints lie on the line. Otherwise, if they have
+            // the same sign, they are on the same side of the line and can't
+            // intersect it.
+            if r0 == 0.0 && r1 == 0.0 {
+                return Intersection::Colinear;
+            } else if same_sign(r0, r1) {
+                return Intersection::None;
+            }
+
+            // Solve system of equations for intersection point.
+            let x = (- b * y_0 - c) / (a + m * b);
+            let y = m * x + y_0;
+
+            Intersection::At(Point { x, y })
+        }
+    }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// convert_ray_to_segment
-////////////////////////////////////////////////////////////////////////////////
-pub fn convert_ray_to_segment(pt: Point, angle: f64) -> [Point; 2] {
-    unimplemented!()
-}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // extend_segment_to_rect
@@ -314,145 +361,120 @@ pub fn extend_segment_to_rect(segment: [Point; 2], rect: Rect) -> Option<[Point;
 // clip_segment_to_rect
 ////////////////////////////////////////////////////////////////////////////////
 
-pub fn clip_segment_to_rect(
-    segment: [Point; 2],
-    rect: [Point; 2])
+pub fn clip_segment_to_rect(segment: [Point; 2], rect: Rect)
     -> Option<[Point; 2]>
 {
-    use geometry::line::Intersection::*;
+    let [Point {x: xa, y: ya}, Point {x: xb, y: yb}] = segment;
 
-    // Get edge segments.
-    let h0 = [rect[0], Point {x: rect[1].x, y: rect[0].y}];
-    let h1 = [rect[1], Point {x: rect[0].x, y: rect[1].y}];
-    let v0 = [rect[0], Point {x: rect[0].x, y: rect[1].y}];
-    let v1 = [rect[1], Point {x: rect[1].x, y: rect[0].y}];
+    // Liang-Barky line clipping algorithm. Based on the parametric line segment
+    // equations for t in [0.0, 1.0]:
+    //     x = xa + dx * t;
+    //     y = ya + dy * t;
+    let dx = xb - xa;
+    let dy = yb - ya;
+    
+    // Handle aligned clipping specially to account for lines colinear with
+    // edges.
+    if dx == 0.0 {
+        return clipped((ya, yb), rect.top, rect.bottom)
+            .map(|(t, b)| [Point {x: xa, y: t}, Point {x: xa, y: b}]);
+    }
+    if dy == 0.0 {
+        return clipped((xa, xb), rect.left, rect.right)
+            .map(|(l, r)| [Point {x: l, y: ya}, Point {x: r, y: ya}]);
+    }
 
-    // Intersect edges with the segment.
-    let mut h0i = intersect_segment_with_segment(segment, h0);
-    let mut h1i = intersect_segment_with_segment(segment, h1);
-    let mut v0i = intersect_segment_with_segment(segment, v0);
-    let mut v1i = intersect_segment_with_segment(segment, v1);
+    // The initial t values parameterizing the full segment. We want to narrow
+    // this to the intersections with each edge.
+    let mut t = (0.0, 1.0); 
 
-    // If the intersection is outside the rect, invalidate it.
-    if let At(p) = h0i { if !p.contained_in(rect) { h0i = None } };
-    if let At(p) = h1i { if !p.contained_in(rect) { h1i = None } };
-    if let At(p) = v0i { if !p.contained_in(rect) { v0i = None } };
-    if let At(p) = v1i { if !p.contained_in(rect) { v1i = None } };
+    // Constraint on top edge.
+    let t_edge = (rect.top - ya) / dy;
+    if t_edge >= t.0 && t_edge <= t.1 {
+        if -dy <= 0.0 { t.0 = t_edge; } else { t.1 = t_edge; }
+    }
 
-    match (h0i, h1i, v0i, v1i) {
-        // Line follows edge of the rect. (Must precede other sections, because 
-        // colinear on one edge means two intersection points elsewhere.)
-        (Colinear,  _,         _,         _)         => {
-            if segment[0].contained_in(rect) || segment[1].contained_in(rect) {
-                Some([
-                    segment[0].clamped_x(h0[0].x, h0[1].x), 
-                    segment[1].clamped_x(h0[0].x, h0[1].x), 
-                ])
-            } else {
-                Option::None
-            }
-        },
+    // Constraint on left edge.
+    let t_edge = (rect.left - xa) / dx;
+    if t_edge >= t.0 && t_edge <= t.1 {
+        if -dx <= 0.0 { t.0 = t_edge; } else { t.1 = t_edge; }
+    }
 
-        (_,         Colinear,  _,         _)         => {
-            if segment[0].contained_in(rect) || segment[1].contained_in(rect) {
-                Some([
-                    segment[0].clamped_x(h1[0].x, h1[1].x), 
-                    segment[1].clamped_x(h1[0].x, h1[1].x), 
-                ])
-            } else {
-                Option::None
-            }
-        },
+    // Constraint on right edge.
+    let t_edge = (rect.right - xa) / dx;
+    if t_edge >= t.0 && t_edge <= t.1 {
+        if dx <= 0.0 { t.0 = t_edge; } else { t.1 = t_edge; }
+    }
 
-        (_,         _,         Colinear,  _)         => {
-            if segment[0].contained_in(rect) || segment[1].contained_in(rect) {
-                Some([
-                    segment[0].clamped_y(v0[0].y, v0[1].y), 
-                    segment[1].clamped_y(v0[0].y, v0[1].y), 
-                ])
-            } else {
-                Option::None
-            }
-        },
-
-        (_,         _,         _,         Colinear)  => {
-            if segment[0].contained_in(rect) || segment[1].contained_in(rect) {
-                Some([
-                    segment[0].clamped_y(v1[0].y, v1[1].y), 
-                    segment[1].clamped_y(v1[0].y, v1[1].y), 
-                ])
-            } else {
-                Option::None
-            }
-        },
-
-        // Line intersects two edges of the rect. (Must precede single edge 
-        // intersections, which are struct subsets of this.)
-        (At(p1), At(p2), _,      _)      |
-        (At(p1), _,      At(p2), _)      |
-        (At(p1), _,      _,      At(p2)) |
-        (_,      At(p1), At(p2), _)      |
-        (_,      At(p1), _,      At(p2)) |
-        (_,      _,      At(p1), At(p2)) => Some([p1, p2]),
+    // Constraint on bottom edge.
+    let t_edge = (rect.bottom - ya) / dy;
+    if t_edge >= t.0 && t_edge <= t.1 {
+        if dy <= 0.0 { t.0 = t_edge; } else { t.1 = t_edge; }
+    }
 
 
-        // Line intersects one edge of the rect.
-        (At(p),  _,         _,         _)      |
-        (_,         At(p),  _,         _)      |
-        (_,         _,         At(p),  _)      |
-        (_,         _,         _,      At(p))  => {
-            if segment[0].contained_in(rect) {
-                Some([segment[0], p])
-            } else {
-                debug_assert!(segment[1].contained_in(rect));
-                Some([segment[1], p])
-            }
-        },
-
-        // Line intersects no edges. Must be entirely inside or outside.
-        (None,      None,      None,      None)      => {
-            if segment[0].contained_in(rect) {
-                debug_assert!(segment[1].contained_in(rect));
-                Some(segment)
-            } else {
-                Option::None
-            }
-        },
+    // If the t values have flipped their compare, then the segment is outside
+    // the rect. Otherwise, we can use them to identify the bounds of the
+    // clipped segment.
+    if t.0 <= t.1 {
+        Some([
+            Point { x: xa + dx * t.0, y: ya + dy * t.0 },
+            Point { x: xa + dx * t.1, y: ya + dy * t.1 },
+        ])
+    } else {
+        None
     }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // clip_line_to_rect
 ////////////////////////////////////////////////////////////////////////////////
-pub fn clip_line_to_rect(
-    pt: Point,
-    angle: f64,
-    rect: [Point; 2])
+pub fn clip_line_to_rect(pt: Point, angle: f64, rect: Rect)
     -> Option<[Point; 2]>
 {
-    unimplemented!()
-}
+    
+    let mut stepper = RectEdgeIntersectIter::new(pt, angle, rect);
 
-////////////////////////////////////////////////////////////////////////////////
-// clip_ray_to_rect
-////////////////////////////////////////////////////////////////////////////////
-pub fn clip_ray_to_rect(
-    pt: Point,
-    angle: f64,
-    rect: [Point; 2])
-    -> Option<[Point; 2]>
-{
-    unimplemented!()
+    // Iterate over each edge, attempting to intersect with it. We can return
+    // early if we hit a colinear intersection or if we hit two different
+    // intersection points. If we hit two points that are the same, we might
+    // have a corner tangent line or a crossing line. We know it is a crossing
+    // line if we hit another point later on. If it is a tangent line, we will
+    // find no other points and we can reconstruct it at the end. (Hitting only
+    // one point should be impossible because edges coincide at their
+    // endpoints.)
+
+    let mut save = None;
+    while let Some(next) = stepper.next() {
+        match next {
+            EdgeIntersection::Colinear(edge) => {
+                return Some(edge);
+            },
+
+            EdgeIntersection::At(pt)         => {
+                if save.is_none() {
+                    save = Some(pt);
+                } else if save.as_ref() != Some(&pt) {
+                    return Some([save.unwrap(), pt]);
+                }
+            },
+
+            EdgeIntersection::None           => {
+                /* Do nothing. */
+            }, 
+        }
+    }
+
+    save.map(|pt| [pt, pt])
+
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // clip_segment_to_poly
 ////////////////////////////////////////////////////////////////////////////////
-pub fn clip_segment_to_poly(
-    pt: Point,
-    angle: f64,
-    rect: [Point; 2])
+pub fn clip_segment_to_poly(segment: [Point; 2], rect: Rect)
     -> Option<[Point; 2]>
 {
     // Cyrus-Beck algorithm.

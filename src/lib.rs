@@ -24,11 +24,6 @@ mod utilities;
 #[cfg(test)]
 mod test;
 
-// Standard library imports.
-use std::ops::Add;
-use std::ops::Sub;
-use std::ops::Neg;
-
 
 // Exports.
 pub use brush::Brush;
