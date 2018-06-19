@@ -25,6 +25,7 @@ use geometry::Point;
 /// `canvas`: The [`Canvas`] to draw to.
 /// `brush`: The [`Brush`] to draw with.
 /// `pt`: The [`Point`] of the point.
+#[inline]
 pub fn point<C, B>(
     canvas: &mut C,
     brush: &mut B, 

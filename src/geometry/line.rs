@@ -13,7 +13,6 @@
 
 // Local imports.
 use geometry::angle::angle_classify;
-use geometry::angle::angle_shift;
 use geometry::angle::AngleType;
 use geometry::Point;
 use geometry::Rect;
@@ -42,7 +41,6 @@ pub enum Intersection {
 enum EdgeIntersection {
     Colinear([Point; 2]),
     At(Point),
-    None,
 }
 
 struct RectEdgeIter {
@@ -329,8 +327,8 @@ pub fn extend_segment_to_rect(segment: [Point; 2], rect: Rect)
         let ry = (-a * rect.right - c) / b;
 
         // Edge intersections in rect.
-        let mut txi = rect.contains_x(tx);
-        let mut bxi = rect.contains_x(bx);
+        let txi = rect.contains_x(tx);
+        let bxi = rect.contains_x(bx);
         let mut lyi = rect.contains_y(ly);
         let mut ryi = rect.contains_y(ry);
 
@@ -496,10 +494,6 @@ pub fn clip_line_to_rect(pt: Point, angle: f64, rect: Rect)
                     return Some([save.unwrap(), pt]);
                 }
             },
-
-            EdgeIntersection::None           => {
-                /* Do nothing. */
-            }, 
         }
     }
 

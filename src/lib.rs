@@ -21,6 +21,7 @@
 
 // Public modules.
 pub mod geometry;
+#[allow(unused)]
 pub mod primitive;
 
 // Internal modules.

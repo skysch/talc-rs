@@ -14,6 +14,8 @@ use brush::Brush;
 use canvas::Canvas;
 use geometry::Point;
 use geometry::clip_segment_to_rect;
+use utilities::clipped;
+use utilities::ordered;
 
 ////////////////////////////////////////////////////////////////////////////////
 // segment
@@ -82,7 +84,7 @@ pub fn segment<C, B>(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// line_horizontal
+// segment_horizontal
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a horizontal line segment.
 ///
@@ -99,7 +101,10 @@ pub fn segment<C, B>(
 ///
 /// `x`: The x-coordinate of the opptite endpoint.
 ///
-///
+/// [`Canvas`]: ../canvas/trait.Canvas.html
+/// [`Brush`]: ../brush/trait.Brush.html
+/// [`Point`]: ../geometry/struct.Point.html
+#[inline]
 pub fn segment_horizontal<C, B>(
     canvas: &mut C,
     brush: &mut B,
@@ -109,11 +114,25 @@ pub fn segment_horizontal<C, B>(
         C: Canvas,
         B: Brush
 {
-    unimplemented!()
+    let rect = canvas.virtual_bounding_rect(brush);
+    if rect.contains_y(pt.y) {
+        let clip_order = clipped((pt.x, x), rect.left, rect.right)
+            .map(|(a, b)| ordered(a, b));
+        if let Some((xa, xb)) = clip_order {
+            let dx = xb - xa;
+            let mut x = xa;
+            while x < xb {
+                // Solve parametric line equation for stroke.
+                let t = (x - xa) / dx;
+                brush.apply(canvas, Point { x, y: pt.y }, t);
+                x += 1.0;
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// line_vertical
+// segment_vertical
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a vertical line segment.
 ///
@@ -130,9 +149,10 @@ pub fn segment_horizontal<C, B>(
 ///
 /// `y`: The y-coordinate of the opptite endpoint.
 ///
-/// [`Canvas`]: ../talc/trait.Canvas.html
-/// [`Brush`]: ../talc/trait.Brush.html
-/// [`Point`]: ../talc/struct.Point.html
+/// [`Canvas`]: ../canvas/trait.Canvas.html
+/// [`Brush`]: ../brush/trait.Brush.html
+/// [`Point`]: ../geometry/struct.Point.html
+#[inline]
 pub fn segment_vertical<C, B>(
     canvas: &mut C,
     brush: &mut B,
@@ -142,7 +162,21 @@ pub fn segment_vertical<C, B>(
         C: Canvas,
         B: Brush
 {
-    unimplemented!()
+    let rect = canvas.virtual_bounding_rect(brush);
+    if rect.contains_x(pt.x) {
+        let clip_order = clipped((pt.y, y), rect.top, rect.bottom)
+            .map(|(a, b)| ordered(a, b));
+        if let Some((ya, yb)) = clip_order {
+            let dy = yb - ya;
+            let mut y = ya;
+            while y < yb {
+                // Solve parametric line equation for stroke.
+                let t = (y - ya) / dy;
+                brush.apply(canvas, Point { x: pt.x, y }, t);
+                y += 1.0;
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

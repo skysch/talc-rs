@@ -17,7 +17,6 @@ mod line;
 
 // Local imports.
 use utilities::clamped;
-use utilities::ordered;
 
 // Standard library imports.
 use std::ops::Add;

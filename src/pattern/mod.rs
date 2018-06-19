@@ -29,7 +29,7 @@ pub trait Pattern {
 
 // Basic patterns.
 impl Pattern for u32 {
-	fn apply<C, M>(&mut self, canvas: &mut C, mask: M)
+	fn apply<C, M>(&mut self, _canvas: &mut C, _mask: M)
         where
             C: Canvas,
             M: Fn(Point) -> bool

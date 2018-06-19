@@ -19,12 +19,12 @@ name = "talc"
 [dependencies]
 
 
-# [dev-dependencies]
-# criterion = { version="0.2", features=['real_blackbox'] }
+[dev-dependencies]
+criterion = { version="0.2", features=['real_blackbox'] }
 
-# [[bench]]
-# name = "bench_talc"
-# harness = false
+[[bench]]
+name = "bench_talc"
+harness = false
 
 
 # The development profile, used for `cargo build`

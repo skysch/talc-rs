@@ -18,7 +18,6 @@ use geometry::intersect_line_with_segment;
 use geometry::clip_line_to_rect;
 use geometry::clip_segment_to_rect;
 use geometry::Intersection;
-use utilities::close;
 
 // Standard library imports.
 use std::f64::consts::PI;

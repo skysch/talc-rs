@@ -34,7 +34,7 @@ impl TestCanvas {
     fn square(stride: usize) -> Self {
         let len = stride * stride;
         let mut buffer = Vec::with_capacity(len);
-        for i in 0..len {
+        for _ in 0..len {
             buffer.push(0);
         }
 
