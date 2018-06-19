@@ -26,7 +26,7 @@ pub mod primitive;
 // Internal modules.
 mod brush;
 mod canvas;
-// mod pattern;
+mod pattern;
 
 #[allow(unused)]
 mod utilities;
@@ -38,6 +38,7 @@ mod test;
 // Exports.
 // pub use pattern::Pattern;
 pub use brush::Brush;
+pub use pattern::Pattern;
 pub use canvas::Canvas;
 pub use geometry::Point;
 pub use geometry::Rect;
