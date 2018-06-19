@@ -275,7 +275,23 @@ pub fn intersect_line_with_segment(pt: Point, angle: f64, segment: [Point; 2])
 ////////////////////////////////////////////////////////////////////////////////
 // extend_segment_to_rect
 ////////////////////////////////////////////////////////////////////////////////
-pub fn extend_segment_to_rect(segment: [Point; 2], rect: Rect) -> Option<[Point; 2]>
+/// Extends a line segment's endpoints to the boundaries of the [`Rect`].
+/// Returns `None` if the line colinear with the line segment fails to intersect
+/// the `Rect`.
+///
+/// # Arguments
+///
+/// `segment`: The endpoints of the line segment.
+///
+/// `rect`: The boundary `Rect`.
+///
+/// # Panics
+///
+/// Panics if the segment's endpoints are equal.
+///
+/// [`Rect`]: ../talc/struct.Rect.html
+pub fn extend_segment_to_rect(segment: [Point; 2], rect: Rect)
+    -> Option<[Point; 2]>
 {
     // Terse segment constructor.
     #[inline]
@@ -360,7 +376,16 @@ pub fn extend_segment_to_rect(segment: [Point; 2], rect: Rect) -> Option<[Point;
 ////////////////////////////////////////////////////////////////////////////////
 // clip_segment_to_rect
 ////////////////////////////////////////////////////////////////////////////////
-
+/// Clips a line segment to the boundaries of the given `Rect`. Returns `None`
+/// if the line segment lies entirely outside of the `Rect`.
+///
+/// # Arguments
+///
+/// `segment`: The endpoints of the line segment.
+///
+/// `rect`: The boundary `Rect`.
+///
+/// [`Rect`]: ../talc/struct.Rect.html
 pub fn clip_segment_to_rect(segment: [Point; 2], rect: Rect)
     -> Option<[Point; 2]>
 {
@@ -412,7 +437,6 @@ pub fn clip_segment_to_rect(segment: [Point; 2], rect: Rect)
         if dy <= 0.0 { t.0 = t_edge; } else { t.1 = t_edge; }
     }
 
-
     // If the t values have flipped their compare, then the segment is outside
     // the rect. Otherwise, we can use them to identify the bounds of the
     // clipped segment.
@@ -430,6 +454,19 @@ pub fn clip_segment_to_rect(segment: [Point; 2], rect: Rect)
 ////////////////////////////////////////////////////////////////////////////////
 // clip_line_to_rect
 ////////////////////////////////////////////////////////////////////////////////
+/// Clips a line to the boundaries of the given `Rect`. Returns `None` if the
+/// line lies entirely outside of the `Rect`.
+///
+/// # Arguments
+///
+/// `pt`: A [`Point`] on the line.
+///
+/// `angle`: The angle of the line with respect to the positive x-axis.
+///
+/// `rect`: The boundary `Rect`.
+///
+/// [`Point`]: ../talc/struct.Point.html
+/// [`Rect`]: ../talc/struct.Rect.html
 pub fn clip_line_to_rect(pt: Point, angle: f64, rect: Rect)
     -> Option<[Point; 2]>
 {
@@ -468,15 +505,4 @@ pub fn clip_line_to_rect(pt: Point, angle: f64, rect: Rect)
 
     save.map(|pt| [pt, pt])
 
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-// clip_segment_to_poly
-////////////////////////////////////////////////////////////////////////////////
-pub fn clip_segment_to_poly(segment: [Point; 2], rect: Rect)
-    -> Option<[Point; 2]>
-{
-    // Cyrus-Beck algorithm.
-    unimplemented!()
 }

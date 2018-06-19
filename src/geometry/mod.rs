@@ -10,17 +10,6 @@
 //! Common geometry algorithms and primitives.
 //!
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Geometry Algorithms
-// -------------------
-//
-// clip_rect_outline_to_rect  Clip each segment to rect
-// clip_poly_outline_to_rect  Clip each segment to rect
-// clip_rect_to_rect          Simple coordinate clip
-// clip_poly_to_rect          Sutherland–Hodgman algorithm
-// clip_poly_to_poly          Vatti clipping algorithm
-// 
-////////////////////////////////////////////////////////////////////////////////
 
 // Internal modules.
 mod angle;
@@ -38,7 +27,6 @@ use std::f32;
 
 // Exports.
 pub use self::line::clip_line_to_rect;
-pub use self::line::clip_segment_to_poly;
 pub use self::line::clip_segment_to_rect;
 pub use self::line::extend_segment_to_rect;
 pub use self::line::intersect_line_with_segment;
@@ -57,24 +45,19 @@ pub struct Point {
 
 
 impl Point {
+    /// Returns a new `Point` with the given `x`, `y` coordinates.
     #[inline]
     pub fn new(x: f32, y: f32) -> Self {
         Point { x, y }
     }
 
+    /// Returns a new `Point` with coordinates `(1.0, 1.0)`.
     #[inline]
     pub fn one() -> Self {
         Point { x: 1.0, y: 1.0 }
     }
-
-    #[inline]
-    pub fn contained_in(self, rect: [Point; 2]) -> bool {
-        let (l, r) = ordered(rect[0].x, rect[1].x);
-        let (t, b) = ordered(rect[0].y, rect[1].y);
-
-        self.x >= l && self.x < r && self.y >= t && self.y < b
-    }
     
+    /// Returns an x-ordering of the given points.
     #[inline]
     pub fn x_ordered(pair: [Point; 2]) -> [Point; 2] {
         if pair[0].x > pair[1].x {
@@ -84,6 +67,7 @@ impl Point {
         }
     }
 
+    /// Returns a y-ordering of the given points.
     #[inline]
     pub fn y_ordered(pair: [Point; 2]) -> [Point; 2] {
         if pair[0].y > pair[1].y {

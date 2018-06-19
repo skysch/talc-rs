@@ -6,19 +6,29 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 ////////////////////////////////////////////////////////////////////////////////
-//!
+//! Drawing and geometry primitives.
+//! 
+//! All Talc drawing functions take a `Canvas` and a tool. The function will
+//! usually attempt to clip the drawn figure to the canvas area in order to
+//! avoid drawing outside of the canvas boundaries. (The canvas boundaries are
+//! extended by the size of the tool in order to avoid edge discontinuities.)
+//! 
+//! After clipping and calculating the figure, the figure's draw points will be
+//! passed to the tool, which must translate them into canvas coordinates and do
+//! the drawing.
+//! 
 ////////////////////////////////////////////////////////////////////////////////
-#![allow(unused)]
 
 // Public modules.
 pub mod geometry;
+pub mod primitives;
 
 // Internal modules.
 mod brush;
 mod canvas;
-mod line;
-mod pattern;
-mod point;
+// mod pattern;
+
+#[allow(unused)]
 mod utilities;
 
 #[cfg(test)]
@@ -26,22 +36,11 @@ mod test;
 
 
 // Exports.
+// pub use pattern::Pattern;
 pub use brush::Brush;
 pub use canvas::Canvas;
-pub use geometry::Rect;
 pub use geometry::Point;
-pub use line::line;
-pub use line::line_horizontal;
-pub use line::line_vertical;
-pub use line::normal_segment;
-pub use line::ray;
-pub use line::ray_segment;
-pub use line::segment;
-pub use line::segment_extended;
-pub use line::segment_horizontal;
-pub use line::segment_vertical;
-pub use pattern::Pattern;
-pub use point::point;
+pub use geometry::Rect;
 
 
 

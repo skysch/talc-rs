@@ -9,12 +9,10 @@
 //!
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
-
 // Module declarations.
 mod geometry;
 mod point;
+mod line;
 
 // Local imports.
 use canvas::Canvas;

@@ -13,14 +13,14 @@
 use brush::Brush;
 use canvas::Canvas;
 use geometry::Point;
-
+use geometry::clip_segment_to_rect;
 
 ////////////////////////////////////////////////////////////////////////////////
 // segment
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a line segment.
 ///
-/// The resulting line segment will be cropped within the rect of the 
+/// The resulting line segment will be cropped within the boundaries of the 
 /// canvas.
 ///
 /// # Arguments
@@ -31,7 +31,9 @@ use geometry::Point;
 ///
 /// `endpoints`: The [`Point`]s of the line segment's endpoints.
 ///
-///
+/// [`Canvas`]: ../canvas/trait.Canvas.html
+/// [`Brush`]: ../brush/trait.Brush.html
+/// [`Point`]: ../geometry/struct.Point.html
 pub fn segment<C, B>(
     canvas: &mut C,
     brush: &mut B,
@@ -40,7 +42,43 @@ pub fn segment<C, B>(
         C: Canvas,
         B: Brush
 {
-    unimplemented!()
+    let rect = canvas.virtual_bounding_rect(brush);
+    if let Some(segment) = clip_segment_to_rect(endpoints, rect) {
+        let [Point { x: xa, y: ya }, Point { x: xb, y: yb }] = segment;
+        
+        if (xb - xa).abs() < (yb - ya).abs() {
+            let [Point { x: xa, y: ya }, Point { x: xb, y: yb }]
+                 = Point::x_ordered(segment);
+
+            // Horizontally-oriented line.
+            let dx = xb - xa;
+            let dy = yb - ya;
+            let mut x = xa;
+            while x < xb {
+                // Solve parametric line equation for stroke and y-coordinate.
+                let t = (x - xa) / dx;
+                let y = ya + dy * t;
+                brush.apply(canvas, Point { x, y }, t);
+                x += 1.0;
+            }
+
+        } else {
+            let [Point { x: xa, y: ya }, Point { x: xb, y: yb }]
+                 = Point::y_ordered(segment);
+
+            // Horizontally-oriented line.
+            let dx = xb - xa;
+            let dy = yb - ya;
+            let mut y = ya;
+            while y < yb {
+                // Solve parametric line equation for stroke an x-coordinate.
+                let t = (y - ya) / dy;
+                let x = xa + dx * t;
+                brush.apply(canvas, Point { x, y }, t);
+                y += 1.0;
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,73 +285,6 @@ pub fn line_vertical<C, B>(
     // }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// ray_segment
-////////////////////////////////////////////////////////////////////////////////
-/// Draws a line segment as a lengh-delimitted ray.
-///
-/// The resulting line segment will be cropped within the rect of the
-/// canvas.
-///
-/// # Arguments
-///
-/// `canvas`: The [`Canvas`] to draw to.
-///
-/// `brush`: The [`Brush`] to draw with.
-///
-/// `from`: The [`Point`] of the start of the ray.
-///
-/// `angle`: The slope angle of the ray in radians.
-///
-/// `len`: The length of the line segment.
-///
-/// [`Canvas`]: ../talc/trait.Canvas.html
-/// [`Brush`]: ../talc/trait.Brush.html
-/// [`Point`]: ../talc/struct.Point.html
-pub fn ray_segment<C, B>(
-    canvas: &mut C,
-    brush: &mut B,
-    from: Point,
-    angle: f64,
-    len: f64)
-    where
-        C: Canvas,
-        B: Brush
-{
-    unimplemented!()
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// ray
-////////////////////////////////////////////////////////////////////////////////
-/// Draws a ray.
-///
-/// The resulting ray will be cropped within the rect of the canvas.
-///
-/// # Arguments
-///
-/// `canvas`: The [`Canvas`] to draw to.
-///
-/// `brush`: The [`Brush`] to draw with.
-///
-/// `from`: The [`Point`] of the start of the ray.
-///
-/// `angle`: The slope angle of the ray in radians.
-///
-/// [`Canvas`]: ../talc/trait.Canvas.html
-/// [`Brush`]: ../talc/trait.Brush.html
-/// [`Point`]: ../talc/struct.Point.html
-pub fn ray<C, B>(
-    canvas: &mut C,
-    brush: &mut B,
-    pt: Point,
-    angle: f64)
-    where
-        C: Canvas,
-        B: Brush
-{
-    unimplemented!()
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // normal_segment
