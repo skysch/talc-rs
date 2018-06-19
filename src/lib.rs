@@ -21,7 +21,7 @@
 
 // Public modules.
 pub mod geometry;
-pub mod primitives;
+pub mod primitive;
 
 // Internal modules.
 mod brush;

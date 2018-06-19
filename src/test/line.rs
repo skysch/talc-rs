@@ -12,7 +12,7 @@
 // Local imports.
 use canvas::Canvas;
 use geometry::Point;
-use primitives::segment;
+use primitive::segment;
 use test::TestCanvas;
 
 
