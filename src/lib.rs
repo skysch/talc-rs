@@ -43,6 +43,8 @@ pub use pattern::Pattern;
 pub use canvas::Canvas;
 pub use geometry::Point;
 pub use geometry::Rect;
+pub use geometry::Scale;
+pub use geometry::Position;
 
 
 

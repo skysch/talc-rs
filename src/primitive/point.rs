@@ -34,5 +34,5 @@ pub fn point<C, B>(
         C: Canvas,
         B: Brush
 {
-    brush.apply(canvas, pt, 0.0);
+    brush.apply(canvas, pt);
 }

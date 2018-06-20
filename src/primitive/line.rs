@@ -60,7 +60,7 @@ pub fn segment<C, B>(
                 // Solve parametric line equation for stroke and y-coordinate.
                 let t = (x - xa) / dx;
                 let y = ya + dy * t;
-                brush.apply(canvas, Point { x, y }, t);
+                brush.apply(canvas, Point { x, y });
                 x += 1.0;
             }
 
@@ -76,7 +76,7 @@ pub fn segment<C, B>(
                 // Solve parametric line equation for stroke an x-coordinate.
                 let t = (y - ya) / dy;
                 let x = xa + dx * t;
-                brush.apply(canvas, Point { x, y }, t);
+                brush.apply(canvas, Point { x, y });
                 y += 1.0;
             }
         }
@@ -119,12 +119,12 @@ pub fn segment_horizontal<C, B>(
         let clip_order = clipped((pt.x, x), rect.left, rect.right)
             .map(|(a, b)| ordered(a, b));
         if let Some((xa, xb)) = clip_order {
-            let dx = xb - xa;
+            // let dx = xb - xa;
             let mut x = xa;
             while x < xb {
                 // Solve parametric line equation for stroke.
-                let t = (x - xa) / dx;
-                brush.apply(canvas, Point { x, y: pt.y }, t);
+                // let t = (x - xa) / dx;
+                brush.apply(canvas, Point { x, y: pt.y });
                 x += 1.0;
             }
         }
@@ -167,12 +167,12 @@ pub fn segment_vertical<C, B>(
         let clip_order = clipped((pt.y, y), rect.top, rect.bottom)
             .map(|(a, b)| ordered(a, b));
         if let Some((ya, yb)) = clip_order {
-            let dy = yb - ya;
+            // let dy = yb - ya;
             let mut y = ya;
             while y < yb {
                 // Solve parametric line equation for stroke.
-                let t = (y - ya) / dy;
-                brush.apply(canvas, Point { x: pt.x, y }, t);
+                // let t = (y - ya) / dy;
+                brush.apply(canvas, Point { x: pt.x, y });
                 y += 1.0;
             }
         }

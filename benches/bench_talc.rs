@@ -42,7 +42,7 @@ impl TestCanvas {
 
 
 impl Canvas for TestCanvas {
-    fn pixel(&self, pt: Point) -> Option<&u32> {
+    fn aligned_pixel(&self, pt: Point) -> Option<&u32> {
         let (x, y) = (pt.x.floor() as i32, pt.y.floor() as i32);
 
         if x < 0 || y < 0 || x as usize >= self.stride {
@@ -58,7 +58,7 @@ impl Canvas for TestCanvas {
         }
     }
 
-    fn pixel_mut(&mut self, pt: Point) -> Option<&mut u32> {
+    fn aligned_pixel_mut(&mut self, pt: Point) -> Option<&mut u32> {
         let (x, y) = (pt.x.floor() as i32, pt.y.floor() as i32);
 
         if x < 0 || y < 0 || x as usize >= self.stride {

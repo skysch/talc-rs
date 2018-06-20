@@ -20,7 +20,7 @@ use geometry::Point;
 /// A trait representing a brush stroke.
 pub trait Brush {
 	/// Applies the brush to the given canvas.
-    fn apply<C>(&mut self, canvas: &mut C, pt: Point, stroke: f32)
+    fn apply<C>(&mut self, canvas: &mut C, pt: Point)
     	where C: Canvas;
 
     /// Returns the size of the brush.
@@ -35,9 +35,9 @@ pub trait Brush {
 // Basic brushes.
 impl Brush for u32 {
 	#[inline]
-	fn apply<C>(&mut self, canvas: &mut C, pt: Point, _stroke: f32)
+	fn apply<C>(&mut self, canvas: &mut C, pt: Point)
         where C: Canvas
     {
-    	canvas.pixel_mut(pt).map(|p| *p = *self);
+    	canvas.aligned_pixel_mut(pt).map(|p| *p = *self);
     }
 }

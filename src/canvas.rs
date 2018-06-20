@@ -32,17 +32,17 @@ pub trait Canvas {
     // Accessors
     ////////////////////////////////////////////////////////////////////////////
 
-    /// Returns a reference to the pixel at the given [`Point`], or `None` if
-    /// the `Point` lies outside the canvas boundary.
-    ///
-    /// [`Point`]: geometry/struct.Point.html
-    fn pixel(&self, pt: Point) -> Option<&u32>;
-
-    /// Returns a mutable reference to the pixel at the given [`Point`], or
+    /// Returns a reference to the pixel aligned to the given [`Point`], or
     /// `None` if the `Point` lies outside the canvas boundary.
     ///
     /// [`Point`]: geometry/struct.Point.html
-    fn pixel_mut(&mut self, pt: Point) -> Option<&mut u32>;
+    fn aligned_pixel(&self, pt: Point) -> Option<&u32>;
+
+    /// Returns a mutable reference to the pixel aligned to the given [`Point`],
+    /// or `None` if the `Point` lies outside the canvas boundary.
+    ///
+    /// [`Point`]: geometry/struct.Point.html
+    fn aligned_pixel_mut(&mut self, pt: Point) -> Option<&mut u32>;
 
     /// Returns the (inclusive) left boundary coordinate of the canvas.
     fn left(&self) -> f32;

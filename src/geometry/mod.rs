@@ -21,6 +21,8 @@ use utilities::clamped;
 // Standard library imports.
 use std::ops::Add;
 use std::ops::Sub;
+use std::ops::Mul;
+use std::ops::Div;
 use std::ops::Neg;
 use std::f32;
 
@@ -31,6 +33,7 @@ pub use self::line::extend_segment_to_rect;
 pub use self::line::intersect_line_with_segment;
 pub use self::line::intersect_segment_with_segment;
 pub use self::line::Intersection;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Point
@@ -95,10 +98,9 @@ impl Point {
 }
 
 // Numerical operator traits
+
 impl Add<Point> for Point {
     type Output = Point;
-
-    #[inline]
     fn add(self, other: Point) -> Point {
         Point { x: self.x + other.x, y: self.y + other.y }
     }
@@ -106,34 +108,150 @@ impl Add<Point> for Point {
 
 impl Sub<Point> for Point {
     type Output = Point;
-
-    #[inline]
     fn sub(self, other: Point) -> Point {
         Point { x: self.x - other.x, y: self.y - other.y }
     }
 }
 
+impl Mul<Scale> for Point {
+    type Output = Point;
+    fn mul(self, other: Scale) -> Point {
+        Point { x: self.x * other.horz, y: self.y * other.vert }
+    }
+}
+
+impl Div<Scale> for Point {
+    type Output = Point;
+    fn div(self, other: Scale) -> Point {
+        Point { x: self.x / other.horz, y: self.y / other.vert }
+    }
+}
+
 impl Neg for Point {
     type Output = Point;
-
-    #[inline]
     fn neg(self) -> Point {
-        Point { x: -self.x , y: -self.y }
+        Point { x: -self.x, y: -self.y }
     }
 }
 
 // Conversion traits
+
 impl From<(f32, f32)> for Point {
-    #[inline]
     fn from(pt: (f32, f32)) -> Self {
         Point { x: pt.0, y: pt.1 }
     }
 }
 
 impl From<Point> for (f32, f32) {
-    #[inline]
     fn from(pt: Point) -> Self {
         (pt.x, pt.y)
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Position
+////////////////////////////////////////////////////////////////////////////////
+/// A point in a 2-dimensional integer plane.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub struct Position {
+    pub x: i32,
+    pub y: i32,
+}
+
+impl Position {
+    pub fn new(x: i32, y: i32) -> Self {
+        Position { x, y }
+    }
+
+    pub fn one() -> Self {
+        Position { x: 1, y: 1 }
+    }
+}
+
+// Numerical operator traits
+
+impl Add<Position> for Position {
+    type Output = Position;
+    fn add(self, other: Position) -> Position {
+        Position { x: self.x + other.x, y: self.y + other.y }
+    }
+}
+
+impl Sub<Position> for Position {
+    type Output = Position;
+    fn sub(self, other: Position) -> Position {
+        Position { x: self.x - other.x, y: self.y - other.y }
+    }
+}
+
+impl Neg for Position {
+    type Output = Position;
+    fn neg(self) -> Position {
+        Position { x: -self.x , y: -self.y }
+    }
+}
+
+// Conversion traits
+
+impl From<(i32, i32)> for Position {
+    fn from(pt: (i32, i32)) -> Self {
+        Position { x: pt.0, y: pt.1 }
+    }
+}
+
+impl From<Position> for (i32, i32) {
+    fn from(pos: Position) -> Self {
+        (pos.x, pos.y)
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Scale
+////////////////////////////////////////////////////////////////////////////////
+/// A 2-dimensional floating point scaling factor.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Scale {
+    pub horz: f32,
+    pub vert: f32,
+}
+
+impl Scale {
+    pub fn new(horz: f32, vert: f32) -> Self {
+        Scale { horz, vert }
+    }
+}
+
+// Default trait
+
+impl Default for Scale {
+    fn default() -> Self {
+        Scale { horz: 1.0, vert: 1.0 }
+    }
+}
+
+// Numerical operator traits
+
+impl Mul<Point> for Scale {
+    type Output = Point;
+    fn mul(self, other: Point) -> Point {
+        Point { x: self.horz * other.x, y: self.vert * other.y }
+    }
+}
+
+impl Div<Point> for Scale {
+    type Output = Point;
+    fn div(self, other: Point) -> Point {
+        Point { x: self.horz / other.x, y: self.vert / other.y }
+    }
+}
+
+// Conversion traits
+
+impl From<(f32, f32)> for Scale {
+    fn from(pt: (f32, f32)) -> Self {
+        Scale { horz: pt.0, vert: pt.1 }
     }
 }
 
@@ -161,4 +279,5 @@ impl Rect {
         y >= self.top && y < self.bottom
     }
 }
+
 
