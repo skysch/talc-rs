@@ -48,7 +48,7 @@ pub fn segment<C, B>(
     if let Some(segment) = clip_segment_to_rect(endpoints, rect) {
         let [Point { x: xa, y: ya }, Point { x: xb, y: yb }] = segment;
         
-        if (xb - xa).abs() < (yb - ya).abs() {
+        if (yb - ya).abs() < (xb - xa).abs() {
             let [Point { x: xa, y: ya }, Point { x: xb, y: yb }]
                  = Point::x_ordered(segment);
 
@@ -121,7 +121,7 @@ pub fn segment_horizontal<C, B>(
         if let Some((xa, xb)) = clip_order {
             // let dx = xb - xa;
             let mut x = xa;
-            while x < xb {
+            while x <= xb {
                 // Solve parametric line equation for stroke.
                 // let t = (x - xa) / dx;
                 brush.apply(canvas, Point { x, y: pt.y });
@@ -169,7 +169,7 @@ pub fn segment_vertical<C, B>(
         if let Some((ya, yb)) = clip_order {
             // let dy = yb - ya;
             let mut y = ya;
-            while y < yb {
+            while y <= yb {
                 // Solve parametric line equation for stroke.
                 // let t = (y - ya) / dy;
                 brush.apply(canvas, Point { x: pt.x, y });
