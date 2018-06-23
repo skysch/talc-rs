@@ -20,7 +20,9 @@ use utilities::clamped;
 
 // Standard library imports.
 use std::ops::Add;
+use std::ops::AddAssign;
 use std::ops::Sub;
+use std::ops::SubAssign;
 use std::ops::Mul;
 use std::ops::Div;
 use std::ops::Neg;
@@ -106,10 +108,24 @@ impl Add<Point> for Point {
     }
 }
 
+impl AddAssign<Point> for Point {
+    fn add_assign(&mut self, other: Point) {
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
 impl Sub<Point> for Point {
     type Output = Point;
     fn sub(self, other: Point) -> Point {
         Point { x: self.x - other.x, y: self.y - other.y }
+    }
+}
+
+impl SubAssign<Point> for Point {
+    fn sub_assign(&mut self, other: Point) {
+        self.x -= other.x;
+        self.y -= other.y;
     }
 }
 
@@ -178,10 +194,24 @@ impl Add<Position> for Position {
     }
 }
 
+impl AddAssign<Position> for Position {
+    fn add_assign(&mut self, other: Position) {
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
 impl Sub<Position> for Position {
     type Output = Position;
     fn sub(self, other: Position) -> Position {
         Position { x: self.x - other.x, y: self.y - other.y }
+    }
+}
+
+impl SubAssign<Position> for Position {
+    fn sub_assign(&mut self, other: Position) {
+        self.x -= other.x;
+        self.y -= other.y;
     }
 }
 
@@ -277,6 +307,10 @@ impl Rect {
 
     pub fn contains_y(&self, y: f32) -> bool {
         y >= self.top && y < self.bottom
+    }
+
+    pub fn size(&self) -> (f32, f32) {
+        (self.right - self.left, self.bottom - self.top)
     }
 }
 
