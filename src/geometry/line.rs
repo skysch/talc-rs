@@ -399,12 +399,20 @@ pub fn clip_segment_to_rect(segment: [Point; 2], rect: Rect)
     // Handle aligned clipping specially to account for lines colinear with
     // edges.
     if dx == 0.0 {
-        return clipped((ya, yb), rect.top, rect.bottom)
-            .map(|(t, b)| [Point {x: xa, y: t}, Point {x: xa, y: b}]);
+        return if xa >= rect.left && xa < rect.right {
+            clipped((ya, yb), rect.top, rect.bottom)
+                .map(|(t, b)| [Point {x: xa, y: t}, Point {x: xa, y: b}])
+        } else {
+            None
+        }
     }
     if dy == 0.0 {
-        return clipped((xa, xb), rect.left, rect.right)
-            .map(|(l, r)| [Point {x: l, y: ya}, Point {x: r, y: ya}]);
+        return if ya >= rect.top && ya < rect.bottom {
+            clipped((xa, xb), rect.left, rect.right)
+                .map(|(l, r)| [Point {x: l, y: ya}, Point {x: r, y: ya}])
+        } else {
+            None
+        }
     }
 
     // The initial t values parameterizing the full segment. We want to narrow

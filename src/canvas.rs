@@ -174,7 +174,6 @@ pub trait Canvas {
     fn virtual_bounding_rect<B>(&self, brush: &B) -> Rect where B: Brush {
         let (w, h) = brush.size();
         let (bw, bh) =  (w as f32, h as f32);
-
         Rect {
             left: self.left() - bw,
             top: self.top() - bh,

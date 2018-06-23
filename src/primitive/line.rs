@@ -45,6 +45,10 @@ pub fn segment<C, B>(
         B: Brush
 {
     let rect = canvas.virtual_bounding_rect(brush);
+    // println!(" :segment ends {:?}", endpoints);
+    // println!("          rect {:?}", rect);
+    // println!("          clip {:?}", clip_segment_to_rect(endpoints, rect));
+
     if let Some(segment) = clip_segment_to_rect(endpoints, rect) {
         let [Point { x: xa, y: ya }, Point { x: xb, y: yb }] = segment;
         
@@ -56,7 +60,7 @@ pub fn segment<C, B>(
             let dx = xb - xa;
             let dy = yb - ya;
             let mut x = xa;
-            while x < xb {
+            while x <= xb {
                 // Solve parametric line equation for stroke and y-coordinate.
                 let t = (x - xa) / dx;
                 let y = ya + dy * t;
@@ -72,7 +76,7 @@ pub fn segment<C, B>(
             let dx = xb - xa;
             let dy = yb - ya;
             let mut y = ya;
-            while y < yb {
+            while y <= yb {
                 // Solve parametric line equation for stroke an x-coordinate.
                 let t = (y - ya) / dy;
                 let x = xa + dx * t;

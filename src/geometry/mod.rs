@@ -97,18 +97,25 @@ impl Point {
             y: clamped(self.y, lower_bound, upper_bound),
         }
     }
+
+    #[inline]
+    pub fn round(self) -> Position {
+        Position { x: self.x.round() as i32, y: self.y.round() as i32 }
+    }
 }
 
 // Numerical operator traits
 
 impl Add<Point> for Point {
     type Output = Point;
+    #[inline]
     fn add(self, other: Point) -> Point {
         Point { x: self.x + other.x, y: self.y + other.y }
     }
 }
 
 impl AddAssign<Point> for Point {
+    #[inline]
     fn add_assign(&mut self, other: Point) {
         self.x += other.x;
         self.y += other.y;
@@ -117,12 +124,14 @@ impl AddAssign<Point> for Point {
 
 impl Sub<Point> for Point {
     type Output = Point;
+    #[inline]
     fn sub(self, other: Point) -> Point {
         Point { x: self.x - other.x, y: self.y - other.y }
     }
 }
 
 impl SubAssign<Point> for Point {
+    #[inline]
     fn sub_assign(&mut self, other: Point) {
         self.x -= other.x;
         self.y -= other.y;
@@ -131,6 +140,7 @@ impl SubAssign<Point> for Point {
 
 impl Mul<Scale> for Point {
     type Output = Point;
+    #[inline]
     fn mul(self, other: Scale) -> Point {
         Point { x: self.x * other.horz, y: self.y * other.vert }
     }
@@ -138,6 +148,7 @@ impl Mul<Scale> for Point {
 
 impl Div<Scale> for Point {
     type Output = Point;
+    #[inline]
     fn div(self, other: Scale) -> Point {
         Point { x: self.x / other.horz, y: self.y / other.vert }
     }
@@ -145,6 +156,7 @@ impl Div<Scale> for Point {
 
 impl Neg for Point {
     type Output = Point;
+    #[inline]
     fn neg(self) -> Point {
         Point { x: -self.x, y: -self.y }
     }
@@ -153,12 +165,14 @@ impl Neg for Point {
 // Conversion traits
 
 impl From<(f32, f32)> for Point {
+    #[inline]
     fn from(pt: (f32, f32)) -> Self {
         Point { x: pt.0, y: pt.1 }
     }
 }
 
 impl From<Point> for (f32, f32) {
+    #[inline]
     fn from(pt: Point) -> Self {
         (pt.x, pt.y)
     }
@@ -189,12 +203,14 @@ impl Position {
 
 impl Add<Position> for Position {
     type Output = Position;
+    #[inline]
     fn add(self, other: Position) -> Position {
         Position { x: self.x + other.x, y: self.y + other.y }
     }
 }
 
 impl AddAssign<Position> for Position {
+    #[inline]
     fn add_assign(&mut self, other: Position) {
         self.x += other.x;
         self.y += other.y;
@@ -203,12 +219,14 @@ impl AddAssign<Position> for Position {
 
 impl Sub<Position> for Position {
     type Output = Position;
+    #[inline]
     fn sub(self, other: Position) -> Position {
         Position { x: self.x - other.x, y: self.y - other.y }
     }
 }
 
 impl SubAssign<Position> for Position {
+    #[inline]
     fn sub_assign(&mut self, other: Position) {
         self.x -= other.x;
         self.y -= other.y;
@@ -217,6 +235,7 @@ impl SubAssign<Position> for Position {
 
 impl Neg for Position {
     type Output = Position;
+    #[inline]
     fn neg(self) -> Position {
         Position { x: -self.x , y: -self.y }
     }
@@ -225,12 +244,14 @@ impl Neg for Position {
 // Conversion traits
 
 impl From<(i32, i32)> for Position {
+    #[inline]
     fn from(pt: (i32, i32)) -> Self {
         Position { x: pt.0, y: pt.1 }
     }
 }
 
 impl From<Position> for (i32, i32) {
+    #[inline]
     fn from(pos: Position) -> Self {
         (pos.x, pos.y)
     }
@@ -248,6 +269,7 @@ pub struct Scale {
 }
 
 impl Scale {
+    #[inline]
     pub fn new(horz: f32, vert: f32) -> Self {
         Scale { horz, vert }
     }
@@ -256,6 +278,7 @@ impl Scale {
 // Default trait
 
 impl Default for Scale {
+    #[inline]
     fn default() -> Self {
         Scale { horz: 1.0, vert: 1.0 }
     }
@@ -265,6 +288,7 @@ impl Default for Scale {
 
 impl Mul<Point> for Scale {
     type Output = Point;
+    #[inline]
     fn mul(self, other: Point) -> Point {
         Point { x: self.horz * other.x, y: self.vert * other.y }
     }
@@ -272,6 +296,7 @@ impl Mul<Point> for Scale {
 
 impl Div<Point> for Scale {
     type Output = Point;
+    #[inline]
     fn div(self, other: Point) -> Point {
         Point { x: self.horz / other.x, y: self.vert / other.y }
     }
@@ -280,6 +305,7 @@ impl Div<Point> for Scale {
 // Conversion traits
 
 impl From<(f32, f32)> for Scale {
+    #[inline]
     fn from(pt: (f32, f32)) -> Self {
         Scale { horz: pt.0, vert: pt.1 }
     }
@@ -289,6 +315,7 @@ impl From<(f32, f32)> for Scale {
 ////////////////////////////////////////////////////////////////////////////////
 // Rect
 ////////////////////////////////////////////////////////////////////////////////
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rect {
     pub left: f32,
     pub top: f32,
@@ -297,18 +324,42 @@ pub struct Rect {
 }
 
 impl Rect {
+    #[inline]
+    pub fn top_left(&self) -> Point {
+        Point { x: self.left, y: self.top }
+    }
+    
+    #[inline]
+    pub fn bottom_right(&self) -> Point {
+        Point { x: self.right, y: self.bottom }
+    }
+    
+    #[inline]
+    pub fn top_right(&self) -> Point {
+        Point { x: self.right, y: self.top }
+    }
+
+    #[inline]
+    pub fn bottom_left(&self) -> Point {
+        Point { x: self.left, y: self.bottom }
+    }
+
+    #[inline]
     pub fn contains(&self, pt: Point) -> bool {
         self.contains_x(pt.x) && self.contains_y(pt.y)
     }
 
+    #[inline]
     pub fn contains_x(&self, x: f32) -> bool {
         x >= self.left && x < self.right
     }
 
+    #[inline]
     pub fn contains_y(&self, y: f32) -> bool {
         y >= self.top && y < self.bottom
     }
 
+    #[inline]
     pub fn size(&self) -> (f32, f32) {
         (self.right - self.left, self.bottom - self.top)
     }
