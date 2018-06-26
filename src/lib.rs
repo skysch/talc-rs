@@ -18,6 +18,9 @@
 //! the drawing.
 //! 
 ////////////////////////////////////////////////////////////////////////////////
+#![feature(int_to_from_bytes)]
+
+extern crate rusttype;
 
 // Public modules.
 pub mod geometry;
@@ -37,7 +40,6 @@ mod test;
 
 
 // Exports.
-// pub use pattern::Pattern;
 pub use brush::Brush;
 pub use pattern::Pattern;
 pub use canvas::Canvas;
@@ -45,8 +47,10 @@ pub use geometry::Point;
 pub use geometry::Rect;
 pub use geometry::Scale;
 pub use geometry::Position;
+pub use primitive::FontStyle;
+pub use primitive::PreparedText;
 
-
+pub use rusttype::Font;
 
 
 

@@ -23,6 +23,9 @@ pub trait Brush {
     fn apply<C>(&mut self, canvas: &mut C, pt: Point)
     	where C: Canvas;
 
+    fn stroke<C>(&mut self, canvas: &mut C, vertices: &[Point])
+        where C: Canvas;
+
     /// Returns the size of the brush.
     #[inline]
     fn size(&self) -> (u32, u32) { 
@@ -33,6 +36,22 @@ pub trait Brush {
 
 
 // Basic brushes.
+impl Brush for () {
+    #[inline]
+    fn apply<C>(&mut self, _canvas: &mut C, _pt: Point)
+        where C: Canvas
+    {
+        /* Do nothing. */
+    }
+
+    #[inline]
+    fn stroke<C>(&mut self, _canvas: &mut C, _vertices: &[Point])
+        where C: Canvas
+    {
+        /* Do nothing. */
+    }
+}
+
 impl Brush for u32 {
 	#[inline]
 	fn apply<C>(&mut self, canvas: &mut C, pt: Point)
@@ -40,4 +59,12 @@ impl Brush for u32 {
     {
     	canvas.aligned_pixel_mut(pt).map(|p| *p = *self);
     }
+
+    #[inline]
+    fn stroke<C>(&mut self, _canvas: &mut C, _vertices: &[Point])
+        where C: Canvas
+    {
+        unimplemented!()
+    }
 }
+

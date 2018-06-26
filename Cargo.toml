@@ -17,10 +17,11 @@ name = "talc"
 
 
 [dependencies]
-
+rusttype = "*"
 
 [dev-dependencies]
 criterion = { version="0.2", features=['real_blackbox'] }
+
 
 [[bench]]
 name = "bench_talc"
