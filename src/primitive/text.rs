@@ -12,6 +12,7 @@ use brush::Brush;
 use canvas::Canvas;
 use geometry::Point;
 use geometry::Scale;
+use super::line::segment_horizontal;
 
 
 
@@ -120,14 +121,22 @@ impl<'f> PreparedText<'f> {
         canvas: &mut C,
         pattern: &P,
         underline: &B,
-        pt: Point)
+        mut pt: Point)
         where
             C: Canvas,
             P: Pattern,
             B: Brush,
     {
+        pt.y += self.v_metrics.ascent;
+        
         let positioned = self.glyphs.iter().map(|g| g.clone().relative_to(pt));
         PreparedText::draw_positioned(canvas, pattern, pt, positioned);
+
+        if self.font_style.underline {
+            let u_left = Point { x: pt.x, y: pt.y };
+            let u_right = u_left.x + self.width();
+            segment_horizontal(canvas, underline, u_left, u_right);
+        }
     }
 
     #[inline]
@@ -136,14 +145,27 @@ impl<'f> PreparedText<'f> {
         canvas: &mut C,
         pattern: &P,
         underline: &B,
-        pt: Point)
+        mut pt: Point)
         where
             C: Canvas,
             P: Pattern,
             B: Brush,
     {
+        // Shift point.
+        pt.y += self.v_metrics.ascent;
+        
+        // Get underline info.
+        let draw_underline = self.font_style.underline;
+        let u_left = Point { x: pt.x, y: pt.y + 2.0 };
+        let u_right = u_left.x + self.width();
+
+
         let positioned = self.glyphs.into_iter().map(|g| g.relative_to(pt));
         PreparedText::draw_positioned(canvas, pattern, pt, positioned);
+
+        if draw_underline {
+            segment_horizontal(canvas, underline, u_left, u_right);
+        }
     }
 
     fn draw_positioned<C, P, I>(
