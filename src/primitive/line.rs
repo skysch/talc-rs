@@ -38,7 +38,7 @@ use utilities::ordered;
 /// [`Point`]: ../geometry/struct.Point.html
 pub fn segment<C, B>(
     canvas: &mut C,
-    brush: &mut B,
+    brush: &B,
     endpoints: [Point; 2])
     where
         C: Canvas,
@@ -111,7 +111,7 @@ pub fn segment<C, B>(
 #[inline]
 pub fn segment_horizontal<C, B>(
     canvas: &mut C,
-    brush: &mut B,
+    brush: &B,
     pt: Point,
     x: f32)
     where
@@ -159,7 +159,7 @@ pub fn segment_horizontal<C, B>(
 #[inline]
 pub fn segment_vertical<C, B>(
     canvas: &mut C,
-    brush: &mut B,
+    brush: &B,
     pt: Point,
     y: f32)
     where
@@ -205,7 +205,7 @@ pub fn segment_vertical<C, B>(
 /// [`Point`]: ../talc/struct.Point.html
 pub fn segment_extended<C, B>(
     canvas: &mut C,
-    brush: &mut B,
+    brush: &B,
     segment_endpoints: [Point; 2])
     where
         C: Canvas,
@@ -251,7 +251,7 @@ pub fn segment_extended<C, B>(
 /// [`Point`]: ../talc/struct.Point.html
 pub fn line<C, B>(
     canvas: &mut C,
-    brush: &mut B,
+    brush: &B,
     pt: Point,
     angle: f64)
     where
@@ -280,7 +280,7 @@ pub fn line<C, B>(
 /// [`Brush`]: ../talc/trait.Brush.html
 pub fn line_horizontal<C, B>(
     canvas: &mut C,
-    brush: &mut B,
+    brush: &B,
     y: f32)
     where
         C: Canvas,
@@ -311,7 +311,7 @@ pub fn line_horizontal<C, B>(
 /// [`Brush`]: ../talc/trait.Brush.html
 pub fn line_vertical<C, B>(
     canvas: &mut C,
-    brush: &mut B,
+    brush: &B,
     x: f32)
     where
         C: Canvas,
@@ -351,7 +351,7 @@ pub fn line_vertical<C, B>(
 /// [`Point`]: ../talc/struct.Point.html
 pub fn normal_segment<C, B>(
     canvas: &mut C,
-    brush: &mut B,
+    brush: &B,
     from: Point,
     angle: f64,
     dist: f64,

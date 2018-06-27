@@ -8,6 +8,7 @@ use rusttype::GlyphId;
 use rusttype;
 
 use pattern::Pattern;
+use brush::Brush;
 use canvas::Canvas;
 use geometry::Point;
 use geometry::Scale;
@@ -46,38 +47,42 @@ impl FontStyle {
 // glyph
 ////////////////////////////////////////////////////////////////////////////////
 #[inline]
-pub fn glyph<C, P>(
+pub fn glyph<C, P, B>(
     canvas: &mut C,
-    pattern: &mut P,
+    pattern: &P,
+    underline: &B,
     font: &Font,
     font_style: FontStyle,
     pt: Point,
     character: char)
     where
         C: Canvas,
-        P: Pattern
+        P: Pattern,
+        B: Brush,
 {
     prepare_glyph(font, font_style, character)
-        .draw(canvas, pattern, pt)
+        .draw(canvas, pattern, underline, pt)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // text
 ////////////////////////////////////////////////////////////////////////////////
 #[inline]
-pub fn text<C, P>(
+pub fn text<C, P, B>(
     canvas: &mut C,
-    pattern: &mut P,
+    pattern: &P,
+    underline: &B,
     font: &Font,
     font_style: FontStyle,
     pt: Point,
     text: &str)
     where
         C: Canvas,
-        P: Pattern
+        P: Pattern,
+        B: Brush,
 {
     prepare_text(font, font_style, text)
-        .draw(canvas, pattern, pt)
+        .draw(canvas, pattern, underline, pt)
 }
 
 
@@ -110,28 +115,32 @@ impl<'f> PreparedText<'f> {
     }
     
     #[inline]
-    pub fn draw_clone<C, P>(
+    pub fn draw_clone<C, P, B>(
         &self,
         canvas: &mut C,
-        pattern: &mut P,
+        pattern: &P,
+        underline: &B,
         pt: Point)
         where
             C: Canvas,
-            P: Pattern
+            P: Pattern,
+            B: Brush,
     {
         let positioned = self.glyphs.iter().map(|g| g.clone().relative_to(pt));
         PreparedText::draw_positioned(canvas, pattern, pt, positioned);
     }
 
     #[inline]
-    pub fn draw<C, P>(
+    pub fn draw<C, P, B>(
         self,
         canvas: &mut C,
-        pattern: &mut P,
+        pattern: &P,
+        underline: &B,
         pt: Point)
         where
             C: Canvas,
-            P: Pattern
+            P: Pattern,
+            B: Brush,
     {
         let positioned = self.glyphs.into_iter().map(|g| g.relative_to(pt));
         PreparedText::draw_positioned(canvas, pattern, pt, positioned);
@@ -139,7 +148,7 @@ impl<'f> PreparedText<'f> {
 
     fn draw_positioned<C, P, I>(
         canvas: &mut C,
-        pattern: &mut P,
+        pattern: &P,
         pt: Point,
         positioned: I)
         where
@@ -184,7 +193,8 @@ impl<'f> OffsetGlyph<'f> {
     pub fn new_after(
         glyph: ScaledGlyph<'f>,
         prev: OffsetGlyph<'f>,
-        font_style: FontStyle) -> Self
+        font_style: FontStyle)
+        -> Self
     {
         let offset = glyph.h_metrics().advance_width + glyph
             .font()

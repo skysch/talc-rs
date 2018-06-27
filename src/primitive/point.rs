@@ -28,7 +28,7 @@ use geometry::Point;
 #[inline]
 pub fn point<C, B>(
     canvas: &mut C,
-    brush: &mut B, 
+    brush: &B, 
     pt: Point)
     where
         C: Canvas,

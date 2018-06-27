@@ -21,13 +21,13 @@ use utilities::lerp;
 ////////////////////////////////////////////////////////////////////////////////
 /// A trait representing a fill pattern.
 pub trait Pattern {
-    fn apply<C>(&mut self, canvas: &mut C, pt: Point, opacity: f32)
+    fn apply<C>(&self, canvas: &mut C, pt: Point, opacity: f32)
         where
             C: Canvas;
 
     /// Applies the pattern to the given canvas.
     // mask = opacity float
-    fn paint<C, M>(&mut self, canvas: &mut C, rect: Rect, mask: M)
+    fn paint<C, M>(&self, canvas: &mut C, rect: Rect, mask: M)
         where
             C: Canvas,
             M: Fn(Point) -> f32;
@@ -41,14 +41,14 @@ pub trait Pattern {
 
 
 impl Pattern for () {
-    fn apply<C>(&mut self, _canvas: &mut C, _pt: Point, _opacity: f32)
+    fn apply<C>(&self, _canvas: &mut C, _pt: Point, _opacity: f32)
         where
             C: Canvas
     {
         /* Do nothing. */
     }
 
-    fn paint<C, M>(&mut self, _canvas: &mut C, _rect: Rect, _mask: M)
+    fn paint<C, M>(&self, _canvas: &mut C, _rect: Rect, _mask: M)
         where
             C: Canvas,
             M: Fn(Point) -> f32
@@ -58,7 +58,7 @@ impl Pattern for () {
 }
 
 impl Pattern for u32 {
-    fn apply<C>(&mut self, canvas: &mut C, pt: Point, opacity: f32)
+    fn apply<C>(&self, canvas: &mut C, pt: Point, opacity: f32)
         where
             C: Canvas
     {
@@ -77,7 +77,7 @@ impl Pattern for u32 {
             });
     }
 
-    fn paint<C, M>(&mut self, _canvas: &mut C, _rect: Rect, _mask: M)
+    fn paint<C, M>(&self, _canvas: &mut C, _rect: Rect, _mask: M)
         where
             C: Canvas,
             M: Fn(Point) -> f32
