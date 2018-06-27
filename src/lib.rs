@@ -41,16 +41,15 @@ mod test;
 
 // Exports.
 pub use brush::Brush;
-pub use pattern::Pattern;
 pub use canvas::Canvas;
 pub use geometry::Point;
+pub use geometry::Position;
 pub use geometry::Rect;
 pub use geometry::Scale;
-pub use geometry::Position;
+pub use pattern::Pattern;
+pub use primitive::Font;
 pub use primitive::FontStyle;
 pub use primitive::PreparedText;
-
-pub use rusttype::Font;
 
 
 

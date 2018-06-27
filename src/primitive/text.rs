@@ -1,26 +1,36 @@
+// Copyright 2018 Skylor R. Schermer.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+////////////////////////////////////////////////////////////////////////////////
+//! Text drawing primitives.
+////////////////////////////////////////////////////////////////////////////////
 
-use rusttype::Font;
-use rusttype::VMetrics;
-use rusttype::HMetrics;
-use rusttype::ScaledGlyph;
-use rusttype::PositionedGlyph;
-use rusttype::GlyphId;
-use rusttype;
-
-use pattern::Pattern;
+// Local imports.
 use brush::Brush;
 use canvas::Canvas;
 use geometry::Point;
 use geometry::Scale;
+use pattern::Pattern;
 use super::line::segment_horizontal;
 
+// External library imports.
+use rusttype::GlyphId;
+use rusttype::HMetrics;
+use rusttype::PositionedGlyph;
+use rusttype::ScaledGlyph;
+use rusttype::VMetrics;
+use rusttype;
 
 
+pub type Font<'a> = rusttype::Font<'a>;
 
 ////////////////////////////////////////////////////////////////////////////////
 // FontStyle
 ////////////////////////////////////////////////////////////////////////////////
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FontStyle {
     scale: rusttype::Scale,
@@ -44,6 +54,7 @@ impl FontStyle {
     }
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // glyph
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,6 +75,7 @@ pub fn glyph<C, P, B>(
     prepare_glyph(font, font_style, character)
         .draw(canvas, pattern, underline, pt)
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // text
@@ -153,7 +165,7 @@ impl<'f> PreparedText<'f> {
     {
         // Shift point.
         pt.y += self.v_metrics.ascent;
-        
+
         // Get underline info.
         let draw_underline = self.font_style.underline;
         let u_left = Point { x: pt.x, y: pt.y + 2.0 };
@@ -195,6 +207,7 @@ impl<'f> PreparedText<'f> {
         }
     }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // prepare_glyph
@@ -244,7 +257,7 @@ pub fn prepare_glyph<'f>(
     character: char)
     -> PreparedText<'f>
 {
-    // Get the glyph geometry.
+    // Layout the glyph geometry.
     let glyph = OffsetGlyph::new(font
         .glyph(character)
         .scaled(font_style.scale));
@@ -255,6 +268,7 @@ pub fn prepare_glyph<'f>(
         v_metrics: font.v_metrics(font_style.scale),
     }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // prepare_text
@@ -274,7 +288,6 @@ pub fn prepare_text<'f>(
         font_style,
         last_glyph: None
     };
-    
 
     PreparedText {
         glyphs: layout.collect(),

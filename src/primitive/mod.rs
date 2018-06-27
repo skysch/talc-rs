@@ -24,6 +24,7 @@ pub use self::line::segment_extended;
 pub use self::line::segment_horizontal;
 pub use self::line::segment_vertical;
 pub use self::point::point;
+pub use self::text::Font;
 pub use self::text::FontStyle;
 pub use self::text::glyph;
 pub use self::text::prepare_glyph;
