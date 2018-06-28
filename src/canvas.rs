@@ -27,6 +27,7 @@ use geometry::Point;
 /// (x, y) in object space corresponds to the upper left of the pixel at (x, y)
 /// in the buffer.
 pub trait Canvas {
+    type Pixel;
 
     ////////////////////////////////////////////////////////////////////////////
     // Accessors
@@ -36,13 +37,13 @@ pub trait Canvas {
     /// `None` if the `Point` lies outside the canvas boundary.
     ///
     /// [`Point`]: geometry/struct.Point.html
-    fn aligned_pixel(&self, pt: Point) -> Option<&u32>;
+    fn aligned_pixel(&self, pt: Point) -> Option<&Self::Pixel>;
 
     /// Returns a mutable reference to the pixel aligned to the given [`Point`],
     /// or `None` if the `Point` lies outside the canvas boundary.
     ///
     /// [`Point`]: geometry/struct.Point.html
-    fn aligned_pixel_mut(&mut self, pt: Point) -> Option<&mut u32>;
+    fn aligned_pixel_mut(&mut self, pt: Point) -> Option<&mut Self::Pixel>;
 
     /// Returns the (inclusive) left boundary coordinate of the canvas.
     fn left(&self) -> f32;
@@ -171,7 +172,9 @@ pub trait Canvas {
     ///
     /// [`Brush`]: brush/trait.brush.html
     #[inline]
-    fn virtual_bounding_rect<B>(&self, brush: &B) -> Rect where B: Brush {
+    fn virtual_bounding_rect<B>(&self, brush: &B) -> Rect
+        where B: Brush<Self::Pixel>
+    {
         let (w, h) = brush.size();
         let (bw, bh) =  (w as f32, h as f32);
         Rect {

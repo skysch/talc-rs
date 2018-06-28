@@ -26,13 +26,13 @@ use geometry::Point;
 /// `brush`: The [`Brush`] to draw with.
 /// `pt`: The [`Point`] of the point.
 #[inline]
-pub fn point<C, B>(
+pub fn point<C, B, X>(
     canvas: &mut C,
     brush: &B, 
     pt: Point)
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     brush.apply(canvas, pt);
 }

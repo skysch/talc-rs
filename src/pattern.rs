@@ -20,16 +20,16 @@ use utilities::lerp;
 // Pattern
 ////////////////////////////////////////////////////////////////////////////////
 /// A trait representing a fill pattern.
-pub trait Pattern {
+pub trait Pattern<X> {
     fn apply<C>(&self, canvas: &mut C, pt: Point, opacity: f32)
         where
-            C: Canvas;
+            C: Canvas<Pixel=X>;
 
     /// Applies the pattern to the given canvas.
     // mask = opacity float
     fn paint<C, M>(&self, canvas: &mut C, rect: Rect, mask: M)
         where
-            C: Canvas,
+            C: Canvas<Pixel=X>,
             M: Fn(Point) -> f32;
 
     /// Returns the size of the pattern.
@@ -40,27 +40,27 @@ pub trait Pattern {
 }
 
 
-impl Pattern for () {
+impl Pattern<u32> for () {
     fn apply<C>(&self, _canvas: &mut C, _pt: Point, _opacity: f32)
         where
-            C: Canvas
+            C: Canvas<Pixel=u32>
     {
         /* Do nothing. */
     }
 
     fn paint<C, M>(&self, _canvas: &mut C, _rect: Rect, _mask: M)
         where
-            C: Canvas,
+            C: Canvas<Pixel=u32>,
             M: Fn(Point) -> f32
     {
         /* Do nothing. */
     }
 }
 
-impl Pattern for u32 {
+impl Pattern<u32> for u32 {
     fn apply<C>(&self, canvas: &mut C, pt: Point, opacity: f32)
         where
-            C: Canvas
+            C: Canvas<Pixel=u32>
     {
         canvas.aligned_pixel_mut(pt)
             .map(|p| {
@@ -79,7 +79,7 @@ impl Pattern for u32 {
 
     fn paint<C, M>(&self, _canvas: &mut C, _rect: Rect, _mask: M)
         where
-            C: Canvas,
+            C: Canvas<Pixel=u32>,
             M: Fn(Point) -> f32
     {
         unimplemented!()

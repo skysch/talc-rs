@@ -59,7 +59,7 @@ impl FontStyle {
 // glyph
 ////////////////////////////////////////////////////////////////////////////////
 #[inline]
-pub fn glyph<C, P, B>(
+pub fn glyph<C, P, B, X>(
     canvas: &mut C,
     pattern: &P,
     underline: &B,
@@ -68,9 +68,9 @@ pub fn glyph<C, P, B>(
     pt: Point,
     character: char)
     where
-        C: Canvas,
-        P: Pattern,
-        B: Brush,
+        C: Canvas<Pixel=X>,
+        P: Pattern<X>,
+        B: Brush<X>,
 {
     prepare_glyph(font, font_style, character)
         .draw(canvas, pattern, underline, pt)
@@ -81,7 +81,7 @@ pub fn glyph<C, P, B>(
 // text
 ////////////////////////////////////////////////////////////////////////////////
 #[inline]
-pub fn text<C, P, B>(
+pub fn text<C, P, B, X>(
     canvas: &mut C,
     pattern: &P,
     underline: &B,
@@ -90,9 +90,9 @@ pub fn text<C, P, B>(
     pt: Point,
     text: &str)
     where
-        C: Canvas,
-        P: Pattern,
-        B: Brush,
+        C: Canvas<Pixel=X>,
+        P: Pattern<X>,
+        B: Brush<X>,
 {
     prepare_text(font, font_style, text)
         .draw(canvas, pattern, underline, pt)
@@ -128,16 +128,16 @@ impl<'f> PreparedText<'f> {
     }
     
     #[inline]
-    pub fn draw_clone<C, P, B>(
+    pub fn draw_clone<C, P, B, X>(
         &self,
         canvas: &mut C,
         pattern: &P,
         underline: &B,
         mut pt: Point)
         where
-            C: Canvas,
-            P: Pattern,
-            B: Brush,
+            C: Canvas<Pixel=X>,
+            P: Pattern<X>,
+            B: Brush<X>,
     {
         pt.y += self.v_metrics.ascent;
         
@@ -152,16 +152,16 @@ impl<'f> PreparedText<'f> {
     }
 
     #[inline]
-    pub fn draw<C, P, B>(
+    pub fn draw<C, P, B, X>(
         self,
         canvas: &mut C,
         pattern: &P,
         underline: &B,
         mut pt: Point)
         where
-            C: Canvas,
-            P: Pattern,
-            B: Brush,
+            C: Canvas<Pixel=X>,
+            P: Pattern<X>,
+            B: Brush<X>,
     {
         // Shift point.
         pt.y += self.v_metrics.ascent;
@@ -180,14 +180,14 @@ impl<'f> PreparedText<'f> {
         }
     }
 
-    fn draw_positioned<C, P, I>(
+    fn draw_positioned<C, P, X, I,>(
         canvas: &mut C,
         pattern: &P,
         pt: Point,
         positioned: I)
         where
-            C: Canvas,
-            P: Pattern,
+            C: Canvas<Pixel=X>,
+            P: Pattern<X>,
             I: Iterator<Item=PositionedGlyph<'f>>
     {
         // Loop through the glyphs in the text, positioning each one on a line.

@@ -36,13 +36,13 @@ use utilities::ordered;
 /// [`Canvas`]: ../canvas/trait.Canvas.html
 /// [`Brush`]: ../brush/trait.Brush.html
 /// [`Point`]: ../geometry/struct.Point.html
-pub fn segment<C, B>(
+pub fn segment<C, B, X>(
     canvas: &mut C,
     brush: &B,
     endpoints: [Point; 2])
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     let rect = canvas.virtual_bounding_rect(brush);
     // println!(" :segment ends {:?}", endpoints);
@@ -109,14 +109,14 @@ pub fn segment<C, B>(
 /// [`Brush`]: ../brush/trait.Brush.html
 /// [`Point`]: ../geometry/struct.Point.html
 #[inline]
-pub fn segment_horizontal<C, B>(
+pub fn segment_horizontal<C, B, X>(
     canvas: &mut C,
     brush: &B,
     pt: Point,
     x: f32)
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     let rect = canvas.virtual_bounding_rect(brush);
     if rect.contains_y(pt.y) {
@@ -157,14 +157,14 @@ pub fn segment_horizontal<C, B>(
 /// [`Brush`]: ../brush/trait.Brush.html
 /// [`Point`]: ../geometry/struct.Point.html
 #[inline]
-pub fn segment_vertical<C, B>(
+pub fn segment_vertical<C, B, X>(
     canvas: &mut C,
     brush: &B,
     pt: Point,
     y: f32)
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     let rect = canvas.virtual_bounding_rect(brush);
     if rect.contains_x(pt.x) {
@@ -203,13 +203,13 @@ pub fn segment_vertical<C, B>(
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
 /// [`Point`]: ../talc/struct.Point.html
-pub fn segment_extended<C, B>(
+pub fn segment_extended<C, B, X>(
     canvas: &mut C,
     brush: &B,
     segment_endpoints: [Point; 2])
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     unimplemented!()
     // let [mut a, mut b] = segment_endpoints;
@@ -249,14 +249,14 @@ pub fn segment_extended<C, B>(
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
 /// [`Point`]: ../talc/struct.Point.html
-pub fn line<C, B>(
+pub fn line<C, B, X>(
     canvas: &mut C,
     brush: &B,
     pt: Point,
     angle: f64)
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     unimplemented!()
 }
@@ -278,13 +278,13 @@ pub fn line<C, B>(
 ///
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
-pub fn line_horizontal<C, B>(
+pub fn line_horizontal<C, B, X>(
     canvas: &mut C,
     brush: &B,
     y: f32)
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     unimplemented!()
     // for x in canvas.left() .. canvas.right() {
@@ -309,13 +309,13 @@ pub fn line_horizontal<C, B>(
 ///
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
-pub fn line_vertical<C, B>(
+pub fn line_vertical<C, B, X>(
     canvas: &mut C,
     brush: &B,
     x: f32)
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     unimplemented!()
     // for y in canvas.top() .. canvas.bottom() {
@@ -349,7 +349,7 @@ pub fn line_vertical<C, B>(
 /// [`Canvas`]: ../talc/trait.Canvas.html
 /// [`Brush`]: ../talc/trait.Brush.html
 /// [`Point`]: ../talc/struct.Point.html
-pub fn normal_segment<C, B>(
+pub fn normal_segment<C, B, X>(
     canvas: &mut C,
     brush: &B,
     from: Point,
@@ -357,8 +357,8 @@ pub fn normal_segment<C, B>(
     dist: f64,
     len: f64)
     where
-        C: Canvas,
-        B: Brush
+        C: Canvas<Pixel=X>,
+        B: Brush<X>
 {
     unimplemented!()
 }

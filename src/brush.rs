@@ -18,13 +18,13 @@ use geometry::Point;
 // Brush
 ////////////////////////////////////////////////////////////////////////////////
 /// A trait representing a brush stroke.
-pub trait Brush {
+pub trait Brush<X> {
 	/// Applies the brush to the given canvas.
     fn apply<C>(&self, canvas: &mut C, pt: Point)
-    	where C: Canvas;
+    	where C: Canvas<Pixel=X>;
 
     fn stroke<C>(&self, canvas: &mut C, vertices: &[Point])
-        where C: Canvas;
+        where C: Canvas<Pixel=X>;
 
     /// Returns the size of the brush.
     #[inline]
@@ -36,33 +36,33 @@ pub trait Brush {
 
 
 // Basic brushes.
-impl Brush for () {
+impl Brush<u32> for () {
     #[inline]
     fn apply<C>(&self, _canvas: &mut C, _pt: Point)
-        where C: Canvas
+        where C: Canvas<Pixel=u32>
     {
         /* Do nothing. */
     }
 
     #[inline]
     fn stroke<C>(&self, _canvas: &mut C, _vertices: &[Point])
-        where C: Canvas
+        where C: Canvas<Pixel=u32>
     {
         /* Do nothing. */
     }
 }
 
-impl Brush for u32 {
+impl Brush<u32> for u32 {
 	#[inline]
 	fn apply<C>(&self, canvas: &mut C, pt: Point)
-        where C: Canvas
+        where C: Canvas<Pixel=u32>
     {
     	canvas.aligned_pixel_mut(pt).map(|p| *p = *self);
     }
 
     #[inline]
     fn stroke<C>(&self, _canvas: &mut C, _vertices: &[Point])
-        where C: Canvas
+        where C: Canvas<Pixel=u32>
     {
         unimplemented!()
     }
